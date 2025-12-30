@@ -1,0 +1,127 @@
+body {
+  background: #f4f5fb;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* main layout */
+.ledger-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 12px;
+}
+
+.ledger-card {
+  width: 100%;
+  max-width: 1180px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+  padding: 24px 28px 32px;
+}
+
+/* header */
+.ledger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.ledger-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.ledger-subtitle {
+  font-size: 0.86rem;
+  color: #6b7280;
+}
+
+/* content */
+.ledger-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* print block styles */
+.ledger-print-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+  padding: 12px;
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+.ledger-print-block {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  white-space: pre;
+  line-height: 1.15;
+}
+
+/* responsive form spacing */
+@media (max-width: 768px) {
+  .ledger-card {
+    padding: 18px 16px 24px;
+  }
+}
+
+/* hide UI on print */
+@media print {
+  body {
+    background: #ffffff !important;
+    margin: 0;
+  }
+
+  /* make layout simple full-width for print */
+  .ledger-page {
+    padding: 0 !important;
+    display: block;           /* no flex centering on print */
+  }
+
+  .ledger-card {
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    max-width: none;          /* use full page width */
+    margin: 0;                /* remove side gaps */
+  }
+
+  /* show full ASCII table, no scrollbar */
+  .ledger-print-wrapper {
+    overflow-x: visible !important;
+    padding: 0;
+    border: none;
+    background: #ffffff;
+  }
+
+  /* smaller font so all columns fit on A4 */
+  .ledger-print-block {
+    font-size: 9px;           /* you can go to 8px if still a bit wide */
+    line-height: 1.1;
+  }
+
+  /* hide buttons / inputs on print */
+  .no-print {
+    display: none !important;
+  }
+}
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-sidebar {
+  width: 230px;
+}
+
+.app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
