@@ -1,181 +1,220 @@
-// src/SalesPage.js
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// src/NewClientEntry.js - Form to add new client ledger entry
+import React, { useState, useEffect, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "./api";
+import Swal from "sweetalert2";
 
-const page = {
-  maxWidth: "1200px",
-  margin: "20px auto",
-  padding: "20px",
-  background: "#f5f7fb",
-  borderRadius: "8px",
-  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)"
+/* ----------------------------- */
+/* ✅ UI STYLES */
+/* ----------------------------- */
+
+const pageWrap = {
+  minHeight: "100vh",
+  padding: "28px 14px 60px",
+  background:
+    "radial-gradient(1200px 600px at 10% 10%, #eef3ff 0%, transparent 50%)," +
+    "radial-gradient(1200px 600px at 90% 20%, #f1f7ff 0%, transparent 50%)," +
+    "linear-gradient(180deg, #f8faff 0%, #f5f7fb 100%)",
 };
 
-const headerRow = {
-  display: "flex",
-  justifyContent: "space-between",
+const container = {
+  maxWidth: "900px",
+  margin: "0 auto",
+  padding: "26px",
+  background: "#ffffff",
+  borderRadius: "14px",
+  border: "1px solid #e6ebf5",
+  boxShadow: "0 10px 26px rgba(16, 24, 40, 0.06)",
+};
+
+const headerCard = {
+  display: "grid",
+  gridTemplateColumns: "auto 1fr auto",
   alignItems: "center",
-  marginBottom: "16px"
+  gap: "12px",
+  padding: "14px 14px",
+  background: "#ffffff",
+  borderRadius: "12px",
+  border: "1px solid #e8edf7",
+  boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
+  marginBottom: "18px",
 };
 
 const title = {
-  fontSize: "24px",
-  fontWeight: "bold"
+  margin: 0,
+  fontSize: "26px",
+  fontWeight: "800",
+  color: "#0f1f3d",
+  textAlign: "center",
+  letterSpacing: "0.2px",
+  lineHeight: 1.2,
 };
 
-const btn = {
-  padding: "6px 12px",
-  borderRadius: "4px",
-  border: "1px solid #2f5597",
-  background: "#fff",
-  color: "#2f5597",
-  cursor: "pointer",
-  marginLeft: "8px",
-  fontSize: "13px",
-  fontWeight: 600
+const subtitle = {
+  marginTop: "6px",
+  fontSize: "11px",
+  fontWeight: "700",
+  color: "#1f3b7a",
+  background: "#eef5ff",
+  border: "1px solid #dbe7ff",
+  display: "inline-block",
+  padding: "3px 8px",
+  borderRadius: "999px",
 };
 
-const card = {
-  background: "#ffffff",
-  borderRadius: "8px",
-  padding: "20px",
-  border: "1px solid #e0e0e0"
+const formGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "14px 16px",
 };
 
-const label = { fontSize: "13px", fontWeight: 600, marginBottom: "4px" };
+const formGroup = {
+  marginBottom: "0px",
+};
+
+const label = {
+  display: "block",
+  marginBottom: "6px",
+  fontWeight: "700",
+  fontSize: "12px",
+  color: "#27324a",
+  letterSpacing: "0.2px",
+};
 
 const input = {
   width: "100%",
-  padding: "6px 8px",
-  borderRadius: "4px",
-  border: "1px solid #ced4da",
-  fontSize: "13px"
+  padding: "10px 11px",
+  borderRadius: "8px",
+  border: "1px solid #d9e2f2",
+  fontSize: "12.5px",
+  background: "#fff",
+  boxSizing: "border-box",
+  outline: "none",
+  transition: "border .15s ease, box-shadow .15s ease",
 };
 
-const row = {
-  display: "grid",
-  gridTemplateColumns: "repeat(3, 1fr)",
-  gap: "12px",
-  marginBottom: "12px"
+const select = {
+  ...input,
 };
 
-const footerRow = {
-  marginTop: "20px",
-  textAlign: "right"
+const inputReadOnly = {
+  ...input,
+  background: "#f6f8ff",
+  fontWeight: "700",
+  color: "#1f3b7a",
 };
 
-const saveBtn = {
-  padding: "8px 18px",
-  borderRadius: "4px",
-  border: "none",
-  background: "#28a745",
-  color: "#fff",
+const fullRow = {
+  gridColumn: "1 / -1",
+};
+
+const divider = {
+  height: "1px",
+  background: "linear-gradient(90deg, transparent, #e7edf7, transparent)",
+  margin: "18px 0",
+};
+
+const footerBar = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: "10px",
+  flexWrap: "wrap",
+  marginTop: "22px",
+  paddingTop: "14px",
+  borderTop: "1px solid #eef2f8",
+};
+
+const hint = {
+  fontSize: "10.5px",
+  color: "#6b7280",
+};
+
+const button = {
+  padding: "10px 16px",
+  borderRadius: "8px",
+  border: "1px solid rgba(255,255,255,0.25)",
   cursor: "pointer",
-  fontWeight: 600
+  background:
+    "linear-gradient(135deg, #2f5597 0%, #1f3b7a 50%, #2f5597 100%)",
+  color: "#fff",
+  fontWeight: "800",
+  fontSize: "12px",
+  letterSpacing: "0.2px",
+  transition: "all .2s ease",
+  boxShadow: "0 6px 14px rgba(47, 85, 151, 0.22)",
 };
 
-// same function as backend computeClosing
-function computeClosing(entries) {
-  let balance = 0;
-  const sorted = [...entries].sort(
-    (a, b) => new Date(a.date) - new Date(b.date)
-  );
+const buttonSecondary = {
+  ...button,
+  background: "linear-gradient(135deg, #6c757d 0%, #59626a 100%)",
+  boxShadow: "0 6px 14px rgba(108, 117, 125, 0.22)",
+};
 
-  return sorted.map((e, index) => {
-    const debit = Number(e.debit) || 0;
-    const credit = Number(e.credit) || 0;
+const buttonGhost = {
+  padding: "9px 12px",
+  borderRadius: "8px",
+  border: "1px solid #e3e9f5",
+  background: "#fff",
+  cursor: "pointer",
+  fontWeight: "700",
+  fontSize: "11.5px",
+  color: "#1f3b7a",
+};
 
-    if (
-      index === 0 &&
-      (e.description === "B/F" || e.description === "Opening Balance")
-    ) {
-      balance = credit - debit;
-    } else {
-      balance += credit - debit;
-    }
+const stockInfo = {
+  fontSize: "12px",
+  marginTop: "6px",
+  color: "#374151",
+  fontWeight: "600",
+};
 
-    return { ...e, closingBalance: balance };
-  });
-}
+/* ----------------------------- */
+/* ✅ COMPONENT LOGIC */
+/* ----------------------------- */
 
 function SalesPage() {
+  const { accountName } = useParams();
+  const decodedName = accountName ? decodeURIComponent(accountName) : "";
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    accountName: "",
-    date: "",
+    accountName: decodedName,
+    date: new Date().toISOString().slice(0, 10),
     description: "",
-    productType: "", // 🔹 NEW: Type
-    qty: 0,
-    rate: 0,
-    loading: 0, // loading amount
-    credit: 0,
-    mdays: 0,
-    dueDate: "",
-    liftingDate: "",
-    paymentType: "CASH", // CASH | BANK | CHEQUE
+    productType: "",
+    quantity: "",
+    rate: "",
+    loading: "",
+    credit: "",
+    paymentType: "CASH",
     bankName: "",
     chequeNo: "",
     chequeDate: ""
   });
 
-  const [saving, setSaving] = useState(false);
-  const [openingBalance, setOpeningBalance] = useState(0); // previous remaining balance
-  const [loadingPrev, setLoadingPrev] = useState(false);
-
-  // 🔹 stock info
+  const [loading, setLoading] = useState(false);
   const [productTypes, setProductTypes] = useState([]);
   const [availableByType, setAvailableByType] = useState({});
   const [stockLoading, setStockLoading] = useState(false);
 
-  // numeric helpers
-  const qtyNum = Number(form.qty) || 0;
-  const rateNum = Number(form.rate) || 0;
-  const loadingNum = Number(form.loading) || 0;
-  const creditNum = Number(form.credit) || 0;
+  // Calculate values with useMemo for performance
+  const qtyNum = useMemo(() => Number(form.quantity) || 0, [form.quantity]);
+  const rateNum = useMemo(() => Number(form.rate) || 0, [form.rate]);
+  const loadingNum = useMemo(() => Number(form.loading) || 0, [form.loading]);
+  const debit = useMemo(() => qtyNum * rateNum + loadingNum, [qtyNum, rateNum, loadingNum]);
 
-  // Debit = Qty × Rate + Loading Balance
-  const computedDebit = qtyNum * rateNum + loadingNum;
+  // Get available stock for selected product
+  const availableForSelected = useMemo(() => {
+    return form.productType ? (availableByType[form.productType] || 0) : 0;
+  }, [form.productType, availableByType]);
 
-  // New remaining balance = openingBalance + credit - debit
-  const newRemainingBalance = openingBalance + creditNum - computedDebit;
+  // Calculate stock after this sale
+  const afterSale = useMemo(() => {
+    return availableForSelected - qtyNum;
+  }, [availableForSelected, qtyNum]);
 
-  // available stock for selected type
-  const availableForType =
-    form.productType && availableByType[form.productType]
-      ? availableByType[form.productType]
-      : 0;
-  const remainingQtyAfterSale = availableForType - qtyNum;
-
-  // --- input handlers ---
-  const handleChangeNum = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value === "" ? "" : Number(value)
-    }));
-  };
-
-  const handleChangeText = (e) => {
-    const { name, value } = e.target;
-
-    // payment type change
-    if (name === "paymentType") {
-      setForm((prev) => ({
-        ...prev,
-        paymentType: value,
-        bankName: "",
-        chequeNo: "",
-        chequeDate: ""
-      }));
-      return;
-    }
-
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // 🔹 load stock for types + available qty
+  // Load stock data from API
   const loadStock = async () => {
     try {
       setStockLoading(true);
@@ -185,414 +224,375 @@ function SalesPage() {
       const typesSet = new Set();
       const availableMap = {};
 
+      // Calculate REMAINING stock by summing ALL quantities
+      // (includes negative values from sales)
       list.forEach((s) => {
-        if (s.productType) typesSet.add(s.productType);
-        if (s.productType && s.status === "AVAILABLE") {
+        if (s.productType) {
+          typesSet.add(s.productType);
           const q = Number(s.quantity) || 0;
-          availableMap[s.productType] =
-            (availableMap[s.productType] || 0) + q;
+          availableMap[s.productType] = (availableMap[s.productType] || 0) + q;
         }
       });
 
-      setProductTypes(Array.from(typesSet));
+      setProductTypes(Array.from(typesSet).sort());
       setAvailableByType(availableMap);
     } catch (err) {
       console.error("Error loading stock", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to load stock data.",
+        timer: 2000,
+      });
     } finally {
       setStockLoading(false);
     }
   };
 
-  // --- fetch previous closing balance whenever accountName changes ---
-  useEffect(() => {
-    const name = form.accountName?.trim();
-    if (!name) {
-      setOpeningBalance(0);
-      return;
-    }
-
-    const fetchBalance = async () => {
-      try {
-        setLoadingPrev(true);
-        const res = await api.get("/api/ledger", {
-          params: {
-            accountName: name,
-            from: "1900-01-01",
-            to: "2100-12-31"
-          }
-        });
-
-        const withClosing = computeClosing(res.data || []);
-        if (withClosing.length === 0) {
-          setOpeningBalance(0);
-        } else {
-          const last = withClosing[withClosing.length - 1];
-          setOpeningBalance(last.closingBalance || 0);
-        }
-      } catch (err) {
-        console.error("Error fetching previous balance", err);
-        setOpeningBalance(0);
-      } finally {
-        setLoadingPrev(false);
-      }
-    };
-
-    fetchBalance();
-  }, [form.accountName]);
-
-  // 🔹 load stock once on mount
   useEffect(() => {
     loadStock();
   }, []);
 
-  // --- submit handler ---
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.accountName || !form.date) {
-      alert("Please enter Client/Account Name and Date.");
+
+    // Validation: Check if account name is entered
+    if (!form.accountName || form.accountName.trim() === "") {
+      await Swal.fire({
+        icon: "error",
+        title: "Missing Information",
+        text: "Please enter Client/Account Name",
+      });
       return;
     }
 
-    if (!form.productType) {
-      alert("Please select Type (product).");
-      return;
+    // Validation: Check stock availability
+    if (qtyNum > 0 && form.productType) {
+      const available = availableByType[form.productType] || 0;
+      if (qtyNum > available) {
+        await Swal.fire({
+          icon: "error",
+          title: "Insufficient Stock",
+          html: `
+            <p><strong>Product:</strong> ${form.productType}</p>
+            <p><strong>Available:</strong> ${available.toLocaleString()}</p>
+            <p><strong>Requested:</strong> ${qtyNum.toLocaleString()}</p>
+            <p style="color: #dc2626; font-weight: 600; margin-top: 10px;">
+              Cannot sell more than available stock!
+            </p>
+          `,
+        });
+        return;
+      }
     }
 
-    // check stock
-    if (qtyNum > 0 && qtyNum > availableForType) {
-      alert(
-        `Not enough available stock for ${form.productType}. ` +
-          `Available: ${availableForType}, trying to sell: ${qtyNum}`
-      );
-      return;
-    }
+    setLoading(true);
 
     try {
-      setSaving(true);
-
-      const closingBalance = newRemainingBalance; // use preview value
-
+      // Create ledger entry
       const payload = {
         accountName: form.accountName.trim(),
+        ledgerType: "SALES",
         date: form.date,
         description: form.description,
         productType: form.productType,
         quantity: qtyNum,
         rate: rateNum,
-        debit: computedDebit,
-        credit: creditNum,
-        closingBalance,
-        mdays: form.mdays,
-        dueDate: form.dueDate,
-        liftingDate: form.liftingDate,
         loading: loadingNum,
+        debit,
+        credit: Number(form.credit) || 0,
         paymentType: form.paymentType,
         bankName: form.paymentType === "BANK" ? form.bankName : "",
         chequeNo: form.paymentType === "CHEQUE" ? form.chequeNo : "",
-        chequeDate: form.paymentType === "CHEQUE" ? form.chequeDate : ""
+        chequeDate: form.paymentType === "CHEQUE" && form.chequeDate ? form.chequeDate : null
       };
 
-      // 1) save ledger entry
       await api.post("/api/ledger", payload);
 
-      // 2) deduct stock in real time (negative AVAILABLE entry)
-      if (form.productType && qtyNum !== 0) {
+      // Deduct from stock
+      if (qtyNum > 0 && form.productType) {
         await api.post("/api/stock", {
           productType: form.productType,
           status: "AVAILABLE",
           date: form.date,
-          quantity: -qtyNum, // deduct
+          quantity: -qtyNum, // Negative to deduct
           rate: rateNum
         });
       }
 
-      alert("Sale saved and ledger + stock updated.");
-
-      setForm({
-        accountName: "",
-        date: "",
-        description: "",
-        productType: "",
-        qty: 0,
-        rate: 0,
-        loading: 0,
-        credit: 0,
-        mdays: 0,
-        dueDate: "",
-        liftingDate: "",
-        paymentType: "CASH",
-        bankName: "",
-        chequeNo: "",
-        chequeDate: ""
+      await Swal.fire({
+        icon: "success",
+        title: "Sale Entry Created",
+        text: `Stock deducted: ${qtyNum.toLocaleString()} ${form.productType}`,
+        timer: 1500,
+        showConfirmButton: false,
       });
-      setOpeningBalance(0);
-      await loadStock(); // refresh available stock
+
+      navigate(`/clients/${encodeURIComponent(form.accountName.trim())}`);
     } catch (err) {
       console.error(err);
-      alert("Error saving sale.");
+      const msg = err.response?.data?.message || "Error creating entry.";
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: msg,
+      });
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div style={page}>
-      <div style={headerRow}>
-        <div style={title}>New Sale Entry</div>
-        <div>
-          <button style={btn} onClick={() => navigate("/admin")}>
-            Admin Panel
+    <div style={pageWrap}>
+      <div style={container}>
+        {/* Header */}
+        <div style={headerCard}>
+          <button
+            type="button"
+            style={buttonGhost}
+            onClick={() => navigate(-1)}
+            title="Go back"
+          >
+            ⬅ Back
           </button>
-          <button style={btn} onClick={() => navigate("/")}>
-            Ledger
-          </button>
+
+          <div style={{ textAlign: "center" }}>
+            <h2 style={title}>New Sale Entry</h2>
+            <span style={subtitle}>{form.accountName || "No Client Selected"}</span>
+          </div>
+
+          <div style={{ textAlign: "right" }}>
+            <span style={{ ...hint, display: "inline-block" }}>
+              Sales Ledger Entry
+            </span>
+          </div>
         </div>
-      </div>
 
-      <p style={{ marginBottom: "14px", fontSize: "13px", color: "#555" }}>
-        Create a simple sale entry. It will be stored in the ledger and reflected
-        in the Admin Panel and Client Book automatically. Stock will also be
-        deducted in real time.
-      </p>
-
-      <div style={card}>
         <form onSubmit={handleSubmit}>
-          {/* Row 1 */}
-          <div style={row}>
-            <div>
-              <div style={label}>Client / Account Name</div>
+          {/* Client/Account Name & Date */}
+          <div style={formGrid}>
+            <div style={formGroup}>
+              <label style={label}>Client / Account Name *</label>
               <input
-                style={input}
                 type="text"
                 name="accountName"
                 value={form.accountName}
-                onChange={handleChangeText}
+                onChange={handleChange}
+                style={input}
+                placeholder="Enter client name"
                 required
               />
-              <div
-                style={{ fontSize: "11px", color: "#555", marginTop: "4px" }}
-              >
-                {loadingPrev
-                  ? "Loading previous balance..."
-                  : `Opening Balance: ${openingBalance.toLocaleString("en-US")}`}
-              </div>
             </div>
-            <div>
-              <div style={label}>Date</div>
+
+            <div style={formGroup}>
+              <label style={label}>Date *</label>
               <input
-                style={input}
                 type="date"
                 name="date"
                 value={form.date}
-                onChange={handleChangeText}
+                onChange={handleChange}
+                style={input}
                 required
               />
             </div>
-            <div>
-              <div style={label}>Description</div>
+
+            <div style={{ ...formGroup, ...fullRow }}>
+              <label style={label}>Description</label>
               <input
-                style={input}
                 type="text"
                 name="description"
                 value={form.description}
-                onChange={handleChangeText}
+                onChange={handleChange}
+                style={input}
+                placeholder="e.g., Sale, Payment received"
               />
             </div>
-          </div>
 
-          {/* Row 1.5 – Type & stock info */}
-          <div style={row}>
-            <div>
-              <div style={label}>Type (Product)</div>
+            <div style={formGroup}>
+              <label style={label}>Type (Product)</label>
               <select
-                style={input}
                 name="productType"
                 value={form.productType}
-                onChange={handleChangeText}
+                onChange={handleChange}
+                style={select}
               >
-                <option value="">Select Type</option>
+                <option value="">Select Product Type</option>
                 {productTypes.map((t) => (
                   <option key={t} value={t}>
                     {t}
                   </option>
                 ))}
               </select>
-              <div style={{ fontSize: "11px", marginTop: "4px", color: "#555" }}>
-                {stockLoading
-                  ? "Stock loading..."
-                  : form.productType
-                  ? `Available Qty: ${availableForType.toLocaleString()} | After this sale: ${remainingQtyAfterSale.toLocaleString()}`
-                  : "Select a type to see available stock"}
+              <div style={stockInfo}>
+                {stockLoading ? (
+                  "Loading stock..."
+                ) : form.productType ? (
+                  <>
+                    Available Qty: <strong>{availableForSelected.toLocaleString()}</strong>
+                    {qtyNum > 0 && (
+                      <>
+                        {" | "}After this sale: <strong style={{ color: afterSale < 0 ? "#dc2626" : "#059669" }}>
+                          {afterSale.toLocaleString()}
+                        </strong>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  "Select a product to see available stock"
+                )}
               </div>
             </div>
-            <div />
-            <div />
-          </div>
 
-          {/* Row 2 */}
-          <div style={row}>
-            <div>
-              <div style={label}>Qty</div>
+            <div style={formGroup}>
+              <label style={label}>Qty</label>
               <input
-                style={input}
                 type="number"
-                name="qty"
-                value={form.qty}
-                onChange={handleChangeNum}
+                name="quantity"
+                value={form.quantity}
+                onChange={handleChange}
+                style={input}
+                placeholder="0"
+                min="0"
+                step="0.01"
               />
             </div>
-            <div>
-              <div style={label}>Rate</div>
+
+            <div style={formGroup}>
+              <label style={label}>Rate</label>
               <input
-                style={input}
                 type="number"
                 name="rate"
                 value={form.rate}
-                onChange={handleChangeNum}
+                onChange={handleChange}
+                style={input}
+                placeholder="0"
+                min="0"
+                step="0.01"
               />
             </div>
-            <div>
-              <div style={label}>Loading Balance</div>
+
+            <div style={formGroup}>
+              <label style={label}>Loading Balance</label>
               <input
-                style={input}
                 type="number"
                 name="loading"
                 value={form.loading}
-                onChange={handleChangeNum}
+                onChange={handleChange}
+                style={input}
+                placeholder="0"
+                min="0"
+                step="0.01"
               />
             </div>
-          </div>
 
-          {/* Row 3 */}
-          <div style={row}>
-            <div>
-              <div style={label}>Debit (Qty × Rate + Loading)</div>
+            <div style={formGroup}>
+              <label style={label}>Debit (Qty × Rate + Loading)</label>
               <input
-                style={{ ...input, background: "#f1f3f5" }}
                 type="text"
-                value={computedDebit.toLocaleString("en-US")}
+                value={debit.toLocaleString()}
+                style={inputReadOnly}
                 readOnly
               />
             </div>
-            <div>
-              <div style={label}>Credit</div>
+
+            <div style={formGroup}>
+              <label style={label}>Credit</label>
               <input
-                style={input}
                 type="number"
                 name="credit"
                 value={form.credit}
-                onChange={handleChangeNum}
+                onChange={handleChange}
+                style={input}
+                placeholder="0"
+                min="0"
+                step="0.01"
               />
             </div>
-            <div>
-              <div style={label}>Payment Type</div>
+
+            <div style={formGroup}>
+              <label style={label}>Payment Type</label>
               <select
-                style={input}
                 name="paymentType"
                 value={form.paymentType}
-                onChange={handleChangeText}
+                onChange={handleChange}
+                style={select}
               >
                 <option value="CASH">CASH</option>
                 <option value="BANK">BANK-Transfer</option>
-                <option value="CHEQUE">CHEQUE</option>
+                <option value="CHEQUE">Check Payment</option>
               </select>
             </div>
           </div>
 
-          {/* Row 4 */}
-          <div style={row}>
-            <div>
-              <div style={label}>New Remaining Balance</div>
-              <input
-                style={{ ...input, background: "#f1f3f5" }}
-                type="text"
-                value={newRemainingBalance.toLocaleString("en-US")}
-                readOnly
-              />
-            </div>
-            <div>
-              <div style={label}>M/Days</div>
-              <input
-                style={input}
-                type="number"
-                name="mdays"
-                value={form.mdays}
-                onChange={handleChangeNum}
-              />
-            </div>
-            <div>
-              <div style={label}>Due Date</div>
-              <input
-                style={input}
-                type="date"
-                name="dueDate"
-                value={form.dueDate}
-                onChange={handleChangeText}
-              />
-            </div>
-          </div>
+          <div style={divider} />
 
-          {/* Row 5: Lifting + Bank / Cheque fields */}
-          <div style={row}>
-            <div>
-              <div style={label}>Lifting Date</div>
-              <input
-                style={input}
-                type="date"
-                name="liftingDate"
-                value={form.liftingDate}
-                onChange={handleChangeText}
-              />
-            </div>
-
-            <div>
-              <div style={label}>Bank (if Bank Payment)</div>
-              <select
-                style={input}
-                name="bankName"
-                value={form.bankName}
-                onChange={handleChangeText}
-                disabled={form.paymentType !== "BANK"}
-              >
-                <option value="">Select Bank</option>
-                <option value="Mezan">Mezan</option>
-                <option value="JS">JS</option>
-                <option value="ASKARI">ASKARI</option>
-                <option value="FAISAL">FAISAL</option>
-                <option value="BANK-ISLAMI">BANK-ISLAMI</option>
-                <option value="UBL">UBL</option>
-                <option value="ALLIED">ALLIED</option>
-              </select>
-            </div>
-
-            <div>
-              <div style={label}>Cheque Details (if Cheque)</div>
-              <div style={{ display: "flex", gap: "4px" }}>
+          {/* Conditional payment fields */}
+          {form.paymentType === "BANK" && (
+            <div style={{ ...formGrid, marginBottom: "14px" }}>
+              <div style={{ ...formGroup, ...fullRow }}>
+                <label style={label}>Bank Name</label>
                 <input
-                  style={{ ...input, flex: 1 }}
                   type="text"
-                  name="chequeNo"
-                  placeholder="Cheque No."
-                  value={form.chequeNo}
-                  onChange={handleChangeText}
-                  disabled={form.paymentType !== "CHEQUE"}
-                />
-                <input
-                  style={{ ...input, flex: 1 }}
-                  type="date"
-                  name="chequeDate"
-                  value={form.chequeDate}
-                  onChange={handleChangeText}
-                  disabled={form.paymentType !== "CHEQUE"}
+                  name="bankName"
+                  value={form.bankName}
+                  onChange={handleChange}
+                  style={input}
+                  placeholder="Bank name"
                 />
               </div>
             </div>
-          </div>
+          )}
 
-          <div style={footerRow}>
-            <button style={saveBtn} type="submit" disabled={saving}>
-              {saving ? "Saving..." : "Save Sale"}
-            </button>
+          {form.paymentType === "CHEQUE" && (
+            <div style={{ ...formGrid, marginBottom: "14px" }}>
+              <div style={formGroup}>
+                <label style={label}>Cheque Number</label>
+                <input
+                  type="text"
+                  name="chequeNo"
+                  value={form.chequeNo}
+                  onChange={handleChange}
+                  style={input}
+                  placeholder="Cheque number"
+                />
+              </div>
+
+              <div style={formGroup}>
+                <label style={label}>Cheque Date</label>
+                <input
+                  type="date"
+                  name="chequeDate"
+                  value={form.chequeDate}
+                  onChange={handleChange}
+                  style={input}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Footer actions */}
+          <div style={footerBar}>
+            <div style={hint}>
+              💡 Stock will be deducted automatically after saving this sale.
+            </div>
+
+            <div>
+              <button type="submit" style={button} disabled={loading}>
+                {loading ? "Saving..." : "Save Entry"}
+              </button>
+              <button
+                type="button"
+                style={{ ...buttonSecondary, marginLeft: "8px" }}
+                onClick={() => navigate(-1)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </form>
       </div>

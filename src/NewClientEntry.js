@@ -1,10 +1,11 @@
 // src/NewClientEntry.js - Form to add new client ledger entry
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "./api";
+import Swal from "sweetalert2";
 
 /* ----------------------------- */
-/* ✅ UI UPGRADE (NO LOGIC CHANGE) */
+/* ✅ UI STYLES */
 /* ----------------------------- */
 
 const pageWrap = {
@@ -92,6 +93,10 @@ const input = {
   transition: "border .15s ease, box-shadow .15s ease",
 };
 
+const select = {
+  ...input,
+};
+
 const inputReadOnly = {
   ...input,
   background: "#f6f8ff",
@@ -157,8 +162,15 @@ const buttonGhost = {
   color: "#1f3b7a",
 };
 
+const stockInfo = {
+  fontSize: "12px",
+  marginTop: "6px",
+  color: "#374151",
+  fontWeight: "600",
+};
+
 /* ----------------------------- */
-/* ✅ LOGIC (UNCHANGED) */
+/* ✅ COMPONENT LOGIC */
 /* ----------------------------- */
 
 function NewClientEntry() {
@@ -181,22 +193,97 @@ function NewClientEntry() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [productTypes, setProductTypes] = useState([]);
+  const [availableByType, setAvailableByType] = useState({});
+  const [stockLoading, setStockLoading] = useState(false);
+
+  // Calculate values with useMemo for performance
+  const qtyNum = useMemo(() => Number(form.quantity) || 0, [form.quantity]);
+  const rateNum = useMemo(() => Number(form.rate) || 0, [form.rate]);
+  const loadingNum = useMemo(() => Number(form.loading) || 0, [form.loading]);
+  const debit = useMemo(() => qtyNum * rateNum + loadingNum, [qtyNum, rateNum, loadingNum]);
+
+  // Get available stock for selected product
+  const availableForSelected = useMemo(() => {
+    return form.productType ? (availableByType[form.productType] || 0) : 0;
+  }, [form.productType, availableByType]);
+
+  // Calculate stock after this sale
+  const afterSale = useMemo(() => {
+    return availableForSelected - qtyNum;
+  }, [availableForSelected, qtyNum]);
+
+  // Load stock data from API
+  const loadStock = async () => {
+    try {
+      setStockLoading(true);
+      const res = await api.get("/api/stock");
+      const list = res.data || [];
+
+      const typesSet = new Set();
+      const availableMap = {};
+
+      // Calculate REMAINING stock by summing ALL quantities
+      // (includes negative values from sales)
+      list.forEach((s) => {
+        if (s.productType) {
+          typesSet.add(s.productType);
+          const q = Number(s.quantity) || 0;
+          availableMap[s.productType] = (availableMap[s.productType] || 0) + q;
+        }
+      });
+
+      setProductTypes(Array.from(typesSet).sort());
+      setAvailableByType(availableMap);
+    } catch (err) {
+      console.error("Error loading stock", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to load stock data.",
+        timer: 2000,
+      });
+    } finally {
+      setStockLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadStock();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const qtyNum = Number(form.quantity) || 0;
-  const rateNum = Number(form.rate) || 0;
-  const loadingNum = Number(form.loading) || 0;
-  const debit = qtyNum * rateNum + loadingNum;
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation: Check stock availability
+    if (qtyNum > 0 && form.productType) {
+      const available = availableByType[form.productType] || 0;
+      if (qtyNum > available) {
+        await Swal.fire({
+          icon: "error",
+          title: "Insufficient Stock",
+          html: `
+            <p><strong>Product:</strong> ${form.productType}</p>
+            <p><strong>Available:</strong> ${available.toLocaleString()}</p>
+            <p><strong>Requested:</strong> ${qtyNum.toLocaleString()}</p>
+            <p style="color: #dc2626; font-weight: 600; margin-top: 10px;">
+              Cannot sell more than available stock!
+            </p>
+          `,
+        });
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
+      // Create ledger entry
       const payload = {
         accountName: decodedName,
         ledgerType: "SALES",
@@ -216,21 +303,34 @@ function NewClientEntry() {
 
       await api.post("/api/ledger", payload);
 
-      // If it's a sale (debit > 0), deduct from stock
+      // Deduct from stock
       if (qtyNum > 0 && form.productType) {
         await api.post("/api/stock", {
           productType: form.productType,
           status: "AVAILABLE",
           date: form.date,
-          quantity: -qtyNum,
+          quantity: -qtyNum, // Negative to deduct
           rate: rateNum
         });
       }
 
+      await Swal.fire({
+        icon: "success",
+        title: "Sale Entry Created",
+        text: `Stock deducted: ${qtyNum.toLocaleString()} ${form.productType}`,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
       navigate(`/clients/${encodeURIComponent(decodedName)}`);
     } catch (err) {
       console.error(err);
-      alert("Error creating entry.");
+      const msg = err.response?.data?.message || "Error creating entry.";
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: msg,
+      });
     } finally {
       setLoading(false);
     }
@@ -239,7 +339,7 @@ function NewClientEntry() {
   return (
     <div style={pageWrap}>
       <div style={container}>
-        {/* ✅ Modern Header */}
+        {/* Header */}
         <div style={headerCard}>
           <button
             type="button"
@@ -251,7 +351,7 @@ function NewClientEntry() {
           </button>
 
           <div style={{ textAlign: "center" }}>
-            <h2 style={title}>New Entry</h2>
+            <h2 style={title}>New Sale Entry</h2>
             <span style={subtitle}>{decodedName}</span>
           </div>
 
@@ -263,8 +363,18 @@ function NewClientEntry() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* ✅ Clean 2-column layout */}
+          {/* Client/Account Name & Opening Balance */}
           <div style={formGrid}>
+            <div style={formGroup}>
+              <label style={label}>Client / Account Name</label>
+              <input
+                type="text"
+                value={decodedName}
+                style={inputReadOnly}
+                readOnly
+              />
+            </div>
+
             <div style={formGroup}>
               <label style={label}>Date *</label>
               <input
@@ -275,20 +385,6 @@ function NewClientEntry() {
                 style={input}
                 required
               />
-            </div>
-
-            <div style={formGroup}>
-              <label style={label}>Payment Type</label>
-              <select
-                name="paymentType"
-                value={form.paymentType}
-                onChange={handleChange}
-                style={input}
-              >
-                <option value="CASH">CASH</option>
-                <option value="BANK">BANK-Transfer</option>
-                <option value="CHEQUE">Check Payment</option>
-              </select>
             </div>
 
             <div style={{ ...formGroup, ...fullRow }}>
@@ -304,19 +400,42 @@ function NewClientEntry() {
             </div>
 
             <div style={formGroup}>
-              <label style={label}>Product Type</label>
-              <input
-                type="text"
+              <label style={label}>Type (Product)</label>
+              <select
                 name="productType"
                 value={form.productType}
                 onChange={handleChange}
-                style={input}
-                placeholder="e.g., CRC, EG, GP"
-              />
+                style={select}
+              >
+                <option value="">Select Product Type</option>
+                {productTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+              <div style={stockInfo}>
+                {stockLoading ? (
+                  "Loading stock..."
+                ) : form.productType ? (
+                  <>
+                    Available Qty: <strong>{availableForSelected.toLocaleString()}</strong>
+                    {qtyNum > 0 && (
+                      <>
+                        {" | "}After this sale: <strong style={{ color: afterSale < 0 ? "#dc2626" : "#059669" }}>
+                          {afterSale.toLocaleString()}
+                        </strong>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  "Select a product to see available stock"
+                )}
+              </div>
             </div>
 
             <div style={formGroup}>
-              <label style={label}>Quantity</label>
+              <label style={label}>Qty</label>
               <input
                 type="number"
                 name="quantity"
@@ -324,6 +443,8 @@ function NewClientEntry() {
                 onChange={handleChange}
                 style={input}
                 placeholder="0"
+                min="0"
+                step="0.01"
               />
             </div>
 
@@ -336,11 +457,13 @@ function NewClientEntry() {
                 onChange={handleChange}
                 style={input}
                 placeholder="0"
+                min="0"
+                step="0.01"
               />
             </div>
 
             <div style={formGroup}>
-              <label style={label}>Loading</label>
+              <label style={label}>Loading Balance</label>
               <input
                 type="number"
                 name="loading"
@@ -348,11 +471,13 @@ function NewClientEntry() {
                 onChange={handleChange}
                 style={input}
                 placeholder="0"
+                min="0"
+                step="0.01"
               />
             </div>
 
             <div style={formGroup}>
-              <label style={label}>Debit (Auto-calculated)</label>
+              <label style={label}>Debit (Qty × Rate + Loading)</label>
               <input
                 type="text"
                 value={debit.toLocaleString()}
@@ -362,7 +487,7 @@ function NewClientEntry() {
             </div>
 
             <div style={formGroup}>
-              <label style={label}>Credit (Payment Received)</label>
+              <label style={label}>Credit</label>
               <input
                 type="number"
                 name="credit"
@@ -370,15 +495,31 @@ function NewClientEntry() {
                 onChange={handleChange}
                 style={input}
                 placeholder="0"
+                min="0"
+                step="0.01"
               />
+            </div>
+
+            <div style={formGroup}>
+              <label style={label}>Payment Type</label>
+              <select
+                name="paymentType"
+                value={form.paymentType}
+                onChange={handleChange}
+                style={select}
+              >
+                <option value="CASH">CASH</option>
+                <option value="BANK">BANK-Transfer</option>
+                <option value="CHEQUE">Check Payment</option>
+              </select>
             </div>
           </div>
 
           <div style={divider} />
 
-          {/* ✅ Conditional payment fields styled */}
+          {/* Conditional payment fields */}
           {form.paymentType === "BANK" && (
-            <div style={{ ...formGrid }}>
+            <div style={{ ...formGrid, marginBottom: "14px" }}>
               <div style={{ ...formGroup, ...fullRow }}>
                 <label style={label}>Bank Name</label>
                 <input
@@ -394,7 +535,7 @@ function NewClientEntry() {
           )}
 
           {form.paymentType === "CHEQUE" && (
-            <div style={{ ...formGrid }}>
+            <div style={{ ...formGrid, marginBottom: "14px" }}>
               <div style={formGroup}>
                 <label style={label}>Cheque Number</label>
                 <input
@@ -406,6 +547,10 @@ function NewClientEntry() {
                   placeholder="Cheque number"
                 />
               </div>
+
+
+
+            <h1>KYA HAL AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</h1>
 
               <div style={formGroup}>
                 <label style={label}>Cheque Date</label>
@@ -420,10 +565,10 @@ function NewClientEntry() {
             </div>
           )}
 
-          {/* ✅ Footer actions */}
+          {/* Footer actions */}
           <div style={footerBar}>
             <div style={hint}>
-              Tip: Debit is calculated automatically from Qty × Rate + Loading.
+              💡 Stock will be deducted automatically after saving this sale.
             </div>
 
             <div>

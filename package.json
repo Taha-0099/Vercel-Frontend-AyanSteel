@@ -16,9 +16,9 @@
     "jspdf-autotable": "^5.0.2",
     "jwt-decode": "^3.1.2",
     "pdfkit": "^0.17.2",
-    "react": "^19.2.0",
+    "react": "^18.2.0",
     "react-chartjs-2": "^5.3.1",
-    "react-dom": "^19.2.0",
+    "react-dom": "^18.2.0",
     "react-router-dom": "^7.9.6",
     "react-scripts": "5.0.1",
     "sweetalert2": "^11.26.3",
@@ -35,6 +35,9 @@
       "react-app",
       "react-app/jest"
     ]
+  },
+  "engines": {
+    "node": "20.x"
   },
   "browserslist": {
     "production": [
