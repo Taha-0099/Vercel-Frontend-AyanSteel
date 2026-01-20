@@ -606,32 +606,57 @@ function ClientLedgerPage() {
     doc.setFillColor(85, 132, 255);
     doc.rect(0, 78, pageWidth, 3, "F");
 
-    // Title: AYAN STEEL
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(28);
-    doc.setFont("helvetica", "bold");
-    doc.text("AYAN STEEL", 30, 42);
 
-    // Subtitle (left)
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text("We Deal in All Kind Of CRC, EG, GP HRC Color Coils Steel Sheets", 30, 62);
 
-    // Contacts (right)
-    doc.setFontSize(9.5);
-    doc.text(
-      "Arslan Iftikhar: 03229848888 | Atif Iftikhar: 03214097588",
-      pageWidth - 30,
-      42,
-      { align: "right" }
-    );
+
+
+
+
+
+
+
+
+
+
+// Title: AYAN STEEL
+doc.setTextColor(255, 255, 255);
+doc.setFontSize(28);
+doc.setFont("helvetica", "bold");
+doc.text("AYAN STEEL", 30, 38);
+
+// Subtitle (left)
+doc.setFontSize(10);
+doc.setFont("helvetica", "normal");
+doc.text(
+  "We Deal in All Kind Of CRC, EG, GP HRC Color Coils Steel Sheets",
+  30,
+  56
+);
+
+// ✅ Phones UNDER company name (3rd line)
+doc.setFontSize(9.2);
+doc.setFont("helvetica", "normal");
+doc.text(
+  "Arslan Iftikhar: 03229848888 | Atif Iftikhar: 03214097588 | Salman Iftikhar: 03244905087 | Numan Iftikhar: 03224100022",
+
+  30,
+  68
+);
+
+
+
+
+
+
+
 
     // Badge (right)
     const badgeText = reportTag || "FULL LEDGER";
     const badgeW = Math.min(240, 9.2 * badgeText.length + 34);
     const badgeH = 22;
     const badgeX = pageWidth - 30 - badgeW;
-    const badgeY = 52;
+const badgeY = (78 - badgeH) / 2;   // = 28
+
 
     doc.setDrawColor(255, 255, 255);
     doc.setLineWidth(1);
