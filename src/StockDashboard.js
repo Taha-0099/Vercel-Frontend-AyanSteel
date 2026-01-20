@@ -746,12 +746,20 @@ function computeByProductFromEntries(entries = [], ledgerSoldMap = {}) {
     let sold = 0;
     let remaining = 0;
 
-    // ✅ SAFE RULE: if negatives exist, use them (avoid double count)
-    if (soldFromNegatives > 0) {
+    // ✅ FIXED: Always prioritize ledger sales for accurate sold qty
+    const ledgerSold = safeNum(ledgerSoldMap[nKey] || 0);
+    
+    // ✅ SAFE RULE: Priority order: 1) Ledger sales, 2) Negatives, 3) Remaining fields
+    if (ledgerSold > 0) {
+      // ✅ Use ledger sales (most accurate)
+      sold = ledgerSold;
+      remaining = Math.max(0, totalPurchased - sold);
+    } else if (soldFromNegatives > 0) {
+      // ✅ Fallback to negatives if no ledger data
       sold = soldFromNegatives;
       remaining = Math.max(0, totalPurchased - sold);
     } else if (hasRemainingInfo) {
-      // ✅ If backend provides remaining fields, use them
+      // ✅ Last resort: use backend remaining fields
       remaining = purchases.reduce((s, e) => {
         const q = getEntryQty(e);
         if (q <= 0) return s;
@@ -762,10 +770,9 @@ function computeByProductFromEntries(entries = [], ledgerSoldMap = {}) {
       }, 0);
       sold = Math.max(0, totalPurchased - remaining);
     } else {
-      // ✅ Otherwise fallback to ledger sold (if any)
-      const ledgerSold = safeNum(ledgerSoldMap[nKey] || 0);
-      sold = ledgerSold > 0 ? ledgerSold : 0;
-      remaining = Math.max(0, totalPurchased - sold);
+      // ✅ Default: no sales yet
+      sold = 0;
+      remaining = totalPurchased;
     }
 
     const purchaseValue = purchases.reduce((s, e) => s + entryTotalCost(e), 0);
@@ -1318,6 +1325,21 @@ function StockDashboard() {
     }, 0);
   }, [entries]);
 
+  // ✅ AVAILABLE = TOTAL PURCHASED - TOTAL SOLD (as requested)
+  const availableQtyOverall = useMemo(() => {
+    const purchased = safeNum(totalPurchasedOverall);
+    const sold = safeNum(totalSoldQtyOverall);
+    const diff = purchased - sold;
+    return diff > 0 ? diff : 0;
+  }, [totalPurchasedOverall, totalSoldQtyOverall]);
+
+  // ✅ Approximate available value using average purchase cost per unit
+  const availableValueOverall = useMemo(() => {
+    if (availableQtyOverall <= 0 || totalPurchasedOverall <= 0) return 0;
+    const avgUnitCost = totalPurchasedValueOverall / totalPurchasedOverall;
+    return avgUnitCost * availableQtyOverall;
+  }, [availableQtyOverall, totalPurchasedOverall, totalPurchasedValueOverall]);
+
   return (
     <div style={styles.page}>
       <div style={styles.container}>
@@ -1373,9 +1395,14 @@ function StockDashboard() {
                 <div style={styles.cardAccent} />
                 <div style={styles.cardLabel}>AVAILABLE</div>
                 <div style={{ ...styles.cardValue, color: "#0f5132" }}>
-                  {summary.availableQty.toLocaleString()}
+                  {Number(availableQtyOverall || 0).toLocaleString()}
                 </div>
-                <div style={styles.cardSubValue}>₨ {summary.availableValue.toLocaleString()}</div>
+                <div style={styles.cardSubValue}>
+                  ₨ {Number(availableValueOverall || 0).toLocaleString()}
+                  <div style={{ fontSize: "9px", marginTop: "2px", color: "#6b7a94" }}>
+                    (Total Purchased - Total Sold)
+                  </div>
+                </div>
               </div>
 
               <div style={styles.card}>

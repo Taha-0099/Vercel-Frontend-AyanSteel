@@ -31,214 +31,311 @@ ChartJS.register(
 );
 
 // -----------------------------
-// Modern inline design system
+// Modern Design System
 // -----------------------------
 const palette = {
-  bg: "#f4f7fb",
+  bg: "#f8fafc",
   card: "#ffffff",
-  border: "#e6eaf0",
+  border: "#e2e8f0",
+  borderLight: "#f1f5f9",
   text: "#0f172a",
+  textLight: "#475569",
   muted: "#64748b",
-  primary: "#1f4aa8",
-  primarySoft: "#e8f0ff",
-  success: "#16a34a",
-  danger: "#dc2626",
+  mutedLight: "#94a3b8",
+  primary: "#3b82f6",
+  primaryDark: "#2563eb",
+  primaryLight: "#dbeafe",
+  success: "#10b981",
+  successLight: "#d1fae5",
+  danger: "#ef4444",
+  dangerLight: "#fee2e2",
   warning: "#f59e0b",
+  warningLight: "#fef3c7",
+  warningDark: "#d97706",
+  accent: "#8b5cf6",
+  accentLight: "#ede9fe",
 };
 
 const styles = {
   page: {
-    maxWidth: "1250px",
-    margin: "18px auto",
-    padding: "18px",
+    minHeight: "100vh",
+    background: `linear-gradient(135deg, ${palette.bg} 0%, #e0e7ff 100%)`,
+    padding: "24px",
+  },
+  container: {
+    maxWidth: "1400px",
+    margin: "0 auto",
   },
   shell: {
-    background: palette.bg,
-    borderRadius: "14px",
-    padding: "22px",
-    border: `1px solid ${palette.border}`,
+    background: palette.card,
+    borderRadius: "20px",
+    padding: "32px",
+    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)",
+    border: `1px solid ${palette.borderLight}`,
   },
   headerBar: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    gap: "14px",
+    alignItems: "flex-start",
+    gap: "20px",
     flexWrap: "wrap",
-    marginBottom: "18px",
+    marginBottom: "32px",
+    paddingBottom: "24px",
+    borderBottom: `2px solid ${palette.borderLight}`,
   },
   titleBlock: {
     display: "flex",
     flexDirection: "column",
-    gap: "2px",
+    gap: "6px",
   },
   title: {
-    fontSize: "28px",
+    fontSize: "32px",
     fontWeight: "800",
-    letterSpacing: "-0.4px",
+    letterSpacing: "-0.5px",
     color: palette.text,
+    background: `linear-gradient(135deg, ${palette.primary} 0%, ${palette.accent} 100%)`,
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
   },
   subtitle: {
-    fontSize: "12px",
+    fontSize: "14px",
     color: palette.muted,
+    fontWeight: "500",
   },
   headerActions: {
     display: "flex",
-    gap: "8px",
+    gap: "10px",
     flexWrap: "wrap",
   },
   btn: {
-    padding: "9px 14px",
+    padding: "11px 18px",
+    borderRadius: "12px",
+    border: "none",
+    cursor: "pointer",
+    background: `linear-gradient(135deg, ${palette.primary} 0%, ${palette.primaryDark} 100%)`,
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: "13px",
+    transition: "all 0.2s ease",
+    boxShadow: "0 2px 4px rgba(59,130,246,0.2)",
+  },
+  btnSmall: {
+    padding: "8px 14px",
     borderRadius: "10px",
-    border: `1px solid ${palette.border}`,
+    border: "none",
     cursor: "pointer",
     background: palette.primary,
     color: "#fff",
-    fontWeight: "700",
+    fontWeight: "600",
     fontSize: "12px",
-    transition: "0.2s",
+    transition: "all 0.2s ease",
   },
   btnGhost: {
-    padding: "9px 12px",
-    borderRadius: "10px",
-    border: `1px solid ${palette.border}`,
+    padding: "11px 18px",
+    borderRadius: "12px",
+    border: `1.5px solid ${palette.border}`,
     cursor: "pointer",
     background: "#fff",
     color: palette.text,
-    fontWeight: "700",
+    fontWeight: "600",
+    fontSize: "13px",
+    transition: "all 0.2s ease",
+  },
+  btnGhostSmall: {
+    padding: "8px 14px",
+    borderRadius: "10px",
+    border: `1.5px solid ${palette.border}`,
+    cursor: "pointer",
+    background: "#fff",
+    color: palette.textLight,
+    fontWeight: "600",
     fontSize: "12px",
+    transition: "all 0.2s ease",
   },
 
   grid2: {
     display: "grid",
-    gridTemplateColumns: "1.2fr 1fr",
-    gap: "14px",
+    gridTemplateColumns: "1.3fr 1fr",
+    gap: "20px",
   },
   gridAuto: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-    gap: "12px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gap: "16px",
   },
 
   card: {
-    background: palette.card,
+    background: `linear-gradient(135deg, ${palette.card} 0%, ${palette.borderLight} 100%)`,
     border: `1px solid ${palette.border}`,
-    borderRadius: "12px",
-    padding: "14px",
-    boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
+    borderRadius: "16px",
+    padding: "20px",
+    boxShadow: "0 2px 4px rgba(15,23,42,0.04)",
+    transition: "all 0.2s ease",
   },
   cardHeader: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: "10px",
+    marginBottom: "12px",
   },
   cardTitle: {
-    fontSize: "12px",
+    fontSize: "11px",
     fontWeight: "700",
     color: palette.muted,
     textTransform: "uppercase",
-    letterSpacing: "0.6px",
+    letterSpacing: "0.8px",
   },
   kpiValue: {
-    fontSize: "22px",
+    fontSize: "28px",
     fontWeight: "800",
     color: palette.text,
-    letterSpacing: "-0.3px",
+    letterSpacing: "-0.5px",
+    marginBottom: "4px",
   },
   kpiSub: {
-    fontSize: "11px",
-    color: palette.muted,
-    marginTop: "2px",
+    fontSize: "12px",
+    color: palette.mutedLight,
+    fontWeight: "500",
   },
 
   sectionTitleRow: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: "10px",
+    gap: "16px",
     flexWrap: "wrap",
-    marginTop: "18px",
-    marginBottom: "8px",
+    marginTop: "32px",
+    marginBottom: "16px",
   },
   sectionTitle: {
-    fontSize: "18px",
+    fontSize: "22px",
     fontWeight: "800",
     color: palette.text,
+    letterSpacing: "-0.3px",
   },
 
   searchInput: {
     width: "100%",
-    maxWidth: "340px",
-    padding: "10px 12px",
-    borderRadius: "10px",
-    border: `1px solid ${palette.border}`,
-    fontSize: "13px",
+    maxWidth: "380px",
+    padding: "12px 16px",
+    borderRadius: "12px",
+    border: `1.5px solid ${palette.border}`,
+    fontSize: "14px",
     outline: "none",
     background: "#fff",
+    transition: "all 0.2s ease",
+    fontWeight: "500",
   },
 
   tableWrap: {
     background: "#fff",
     border: `1px solid ${palette.border}`,
-    borderRadius: "12px",
+    borderRadius: "16px",
     overflow: "hidden",
+    boxShadow: "0 2px 8px rgba(15,23,42,0.06)",
   },
   table: {
     width: "100%",
     borderCollapse: "collapse",
   },
   th: {
-    padding: "12px 12px",
+    padding: "16px 16px",
     fontSize: "11px",
-    background: "#f1f5fb",
-    color: "#0f172a",
+    background: `linear-gradient(135deg, ${palette.borderLight} 0%, #e0e7ff 100%)`,
+    color: palette.text,
     fontWeight: "800",
     textAlign: "left",
-    borderBottom: `1px solid ${palette.border}`,
+    borderBottom: `2px solid ${palette.border}`,
     whiteSpace: "nowrap",
+    textTransform: "uppercase",
+    letterSpacing: "0.6px",
   },
   td: {
-    padding: "11px 12px",
-    fontSize: "12.5px",
-    borderBottom: `1px solid ${palette.border}`,
+    padding: "14px 16px",
+    fontSize: "13px",
+    borderBottom: `1px solid ${palette.borderLight}`,
     color: palette.text,
     verticalAlign: "middle",
+    fontWeight: "500",
   },
   rowMuted: {
     color: palette.muted,
   },
 
   badge: {
-    padding: "3px 8px",
+    padding: "4px 10px",
     fontSize: "10px",
     fontWeight: "700",
     borderRadius: "999px",
-    background: palette.primarySoft,
+    background: palette.primaryLight,
     color: palette.primary,
+    textTransform: "uppercase",
+    letterSpacing: "0.3px",
   },
 
   chartBox: {
     background: "#fff",
     border: `1px solid ${palette.border}`,
-    borderRadius: "12px",
-    padding: "14px",
+    borderRadius: "16px",
+    padding: "20px",
+    boxShadow: "0 2px 4px rgba(15,23,42,0.04)",
   },
   chartTitle: {
-    fontSize: "13px",
+    fontSize: "15px",
     fontWeight: "800",
     color: palette.text,
-    marginBottom: "6px",
+    marginBottom: "4px",
+    letterSpacing: "-0.2px",
   },
   chartSub: {
-    fontSize: "11px",
+    fontSize: "12px",
     color: palette.muted,
-    marginBottom: "10px",
+    marginBottom: "16px",
+    fontWeight: "500",
   },
 
   empty: {
-    padding: "14px",
-    fontSize: "12px",
+    padding: "20px",
+    fontSize: "13px",
     color: palette.muted,
+    textAlign: "center",
+    fontWeight: "500",
+  },
+
+  statusIndicator: {
+    display: "inline-block",
+    width: "8px",
+    height: "8px",
+    borderRadius: "50%",
+    marginRight: "8px",
+  },
+
+  warningRow: {
+    background: `${palette.warningLight} !important`,
+    borderLeft: `4px solid ${palette.warning}`,
+  },
+
+  dangerRow: {
+    background: `${palette.dangerLight} !important`,
+    borderLeft: `4px solid ${palette.danger}`,
+  },
+
+  legend: {
+    display: "flex",
+    gap: "20px",
+    alignItems: "center",
+    padding: "12px 16px",
+    background: palette.borderLight,
+    borderRadius: "12px",
+    marginBottom: "16px",
+  },
+  legendItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "12px",
+    fontWeight: "600",
+    color: palette.textLight,
   },
 };
 
@@ -253,9 +350,7 @@ const safeNum = (v) => {
   return Number.isFinite(n) ? n : 0;
 };
 
-// ✅ CORRECTED: Only calculate debit (sale amount), ignore credit (payments)
 const getSaleValue = (e) => {
-  // For SALES entries, only count the debit (amount customer owes)
   const v = safeNum(
     e?.debit ??
       e?.amount ??
@@ -267,11 +362,9 @@ const getSaleValue = (e) => {
       e?.priceTotal ??
       0
   );
-
-  return v; // Return only debit, never credit for sales
+  return v;
 };
 
-// ✅ More robust QTY resolver (supports arrays)
 const getQty = (e) => {
   const direct = safeNum(
     e?.quantity ??
@@ -359,13 +452,10 @@ function prettyMonthLabel(key) {
   return dt.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
 }
 
-// ✅ Flexible but safe sales detector (UPDATED)
 const isSaleEntry = (e) => {
-  // ✅ 1) Prefer your actual schema field
   const cat = (e?.category || "").toString().trim().toUpperCase();
   if (cat) return cat === "SALE" || cat === "SALES";
 
-  // ✅ 2) Fallback to legacy fields if any older data exists
   const raw =
     (e?.ledgerType ?? e?.type ?? e?.entryType ?? "")
       .toString()
@@ -384,6 +474,32 @@ const isSaleEntry = (e) => {
   return compact.startsWith("SALES") || compact.startsWith("SALE");
 };
 
+// Calculate days since last entry
+function getDaysSinceLastEntry(lastDate) {
+  if (!lastDate) return null;
+  const now = new Date();
+  const last = new Date(lastDate);
+  const diffTime = now - last;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+}
+
+// Get row status based on closing balance and inactivity
+function getClientStatus(closingBalance, lastDate) {
+  const balance = safeNum(closingBalance);
+  
+  // Only apply color coding if there's a closing balance
+  if (balance === 0) return "normal";
+  
+  const daysSince = getDaysSinceLastEntry(lastDate);
+  
+  if (daysSince === null) return "normal";
+  
+  if (daysSince >= 15) return "danger";
+  if (daysSince >= 10) return "warning";
+  
+  return "normal";
+}
 
 function Ledger() {
   const [summary, setSummary] = useState(null);
@@ -394,7 +510,6 @@ function Ledger() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
-  // Reusable loader for all data
   const fetchAll = async () => {
     try {
       setLoading(true);
@@ -435,7 +550,6 @@ function Ledger() {
 
         totalCredit += credit;
 
-        // runningBalance += credit - debit
         client._balance += credit - debit;
         client.closingBalance = client._balance;
       });
@@ -444,7 +558,6 @@ function Ledger() {
         a.accountName.localeCompare(b.accountName)
       );
 
-      // Total Debit on dashboard = sum of all clients' remaining balances (absolute)
       const totalDebitFromClosing = clientArray.reduce((sum, c) => {
         const bal = safeNum(c.closingBalance);
         return sum + Math.abs(bal);
@@ -468,10 +581,8 @@ function Ledger() {
 
   useEffect(() => {
     fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 👉 Edit name handler (renames all entries of that account)
   const handleEditName = async (oldName) => {
     const { value } = await Swal.fire({
       title: "Edit Account Name",
@@ -530,9 +641,6 @@ function Ledger() {
     );
   }, [clients, search]);
 
-  // -----------------------------
-  // SALES analytics (robust + correct)
-  // -----------------------------
   const salesEntries = useMemo(() => {
     return entriesAll.filter(isSaleEntry);
   }, [entriesAll]);
@@ -579,7 +687,6 @@ function Ledger() {
     return map;
   }, [salesEntries]);
 
-  // Chart datasets (no hardcoded colors)
   const dailyLineData = useMemo(() => {
     const values = dailyKeys.map((k) => safeNum(dailySalesMap[k]));
     return {
@@ -589,9 +696,12 @@ function Ledger() {
           label: "Daily Sales (₨)",
           data: values,
           fill: true,
-          tension: 0.35,
-          borderWidth: 2,
-          pointRadius: 2,
+          tension: 0.4,
+          borderWidth: 3,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          backgroundColor: "rgba(59, 130, 246, 0.1)",
+          borderColor: palette.primary,
         },
       ],
     };
@@ -606,7 +716,9 @@ function Ledger() {
         {
           label: "Monthly Sales (₨)",
           data: values,
-          borderWidth: 1,
+          borderWidth: 0,
+          borderRadius: 8,
+          backgroundColor: palette.primary,
         },
       ],
     };
@@ -621,6 +733,14 @@ function Ledger() {
         {
           label: "Sales by Payment Type",
           data: keys.length ? values : [1],
+          backgroundColor: [
+            palette.primary,
+            palette.success,
+            palette.warning,
+            palette.accent,
+            palette.danger,
+          ],
+          borderWidth: 0,
         },
       ],
     };
@@ -629,9 +749,16 @@ function Ledger() {
   const lineOptions = useMemo(
     () => ({
       responsive: true,
+      maintainAspectRatio: true,
       plugins: {
-        legend: { display: true },
-        tooltip: { mode: "index", intersect: false },
+        legend: { display: true, position: "top" },
+        tooltip: { 
+          mode: "index", 
+          intersect: false,
+          backgroundColor: palette.text,
+          padding: 12,
+          cornerRadius: 8,
+        },
       },
       interaction: { mode: "nearest", axis: "x", intersect: false },
       scales: {
@@ -641,7 +768,7 @@ function Ledger() {
         },
         y: {
           beginAtZero: true,
-          grid: { color: "rgba(190, 19, 19, 0.48)" },
+          grid: { color: palette.borderLight },
         },
       },
     }),
@@ -651,14 +778,15 @@ function Ledger() {
   const barOptions = useMemo(
     () => ({
       responsive: true,
+      maintainAspectRatio: true,
       plugins: {
-        legend: { display: true },
+        legend: { display: true, position: "top" },
       },
       scales: {
         x: { grid: { display: false } },
         y: {
           beginAtZero: true,
-          grid: { color: "rgba(63, 63, 63, 0.21)" },
+          grid: { color: palette.borderLight },
         },
       },
     }),
@@ -668,6 +796,7 @@ function Ledger() {
   const pieOptions = useMemo(
     () => ({
       responsive: true,
+      maintainAspectRatio: true,
       plugins: {
         legend: { position: "bottom" },
       },
@@ -677,235 +806,317 @@ function Ledger() {
 
   return (
     <div style={styles.page}>
-      <div style={styles.shell}>
-        {/* Header */}
-        <div style={styles.headerBar}>
-          <div style={styles.titleBlock}>
-            <div style={styles.title}>Ledger Dashboard</div>
-            <div style={styles.subtitle}>
-              Clients overview, balances, and sales analytics
+      <div style={styles.container}>
+        <div style={styles.shell}>
+          <div style={styles.headerBar}>
+            <div style={styles.titleBlock}>
+              <div style={styles.title}>Ledger Dashboard</div>
+              <div style={styles.subtitle}>
+                Manage clients, track balances, and analyze sales performance
+              </div>
+            </div>
+            <div style={styles.headerActions}>
+              <button style={styles.btn} onClick={() => navigate("/sales")}>
+                + New Sale
+              </button>
+              <button
+                style={styles.btnGhost}
+                onClick={() => navigate("/company-balance")}
+              >
+                Company Balance
+              </button>
+              <button
+                style={styles.btnGhost}
+                onClick={() => navigate("/available-stock")}
+              >
+                Available Stock
+              </button>
+              <button
+                style={styles.btnGhost}
+                onClick={() => navigate("/stock")}
+              >
+                Stock Dashboard
+              </button>
             </div>
           </div>
-          <div style={styles.headerActions}>
-            <button style={styles.btn} onClick={() => navigate("/sales")}>
-              New Sale
-            </button>
-            <button
-              style={styles.btnGhost}
-              onClick={() => navigate("/company-balance")}
-            >
-              Company Balance
-            </button>
-            <button
-              style={styles.btnGhost}
-              onClick={() => navigate("/available-stock")}
-            >
-              Available Stock
-            </button>
-            <button
-              style={styles.btnGhost}
-              onClick={() => navigate("/stock")}
-            >
-              Stock Dashboard
-            </button>
-          </div>
-        </div>
 
-        {loading && <div style={styles.empty}>Loading dashboard...</div>}
-        {error && (
-          <div style={{ ...styles.empty, color: palette.danger }}>{error}</div>
-        )}
+          {loading && <div style={styles.empty}>Loading dashboard...</div>}
+          {error && (
+            <div style={{ ...styles.empty, color: palette.danger }}>{error}</div>
+          )}
 
-        {/* KPIs */}
-        {summary && (
-          <div style={styles.gridAuto}>
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <span style={styles.cardTitle}>Total Clients</span>
-                <span style={styles.badge}>Active</span>
-              </div>
-              <div style={styles.kpiValue}>{summary.totalClients}</div>
-              <div style={styles.kpiSub}>All unique account names</div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <span style={styles.cardTitle}>Total Entries</span>
-              </div>
-              <div style={styles.kpiValue}>{summary.totalEntries}</div>
-              <div style={styles.kpiSub}>Across all ledger types</div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <span style={styles.cardTitle}>Total Recvieable</span>
-              </div>
-              <div style={styles.kpiValue}>
-                {safeNum(summary.totalDebit).toLocaleString()}
-              </div>
-              <div style={styles.kpiSub}>Sum of absolute closing balances</div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <span style={styles.cardTitle}>Total Credit</span>
-              </div>
-              <div style={styles.kpiValue}>
-                {safeNum(summary.totalCredit).toLocaleString()}
-              </div>
-              <div style={styles.kpiSub}>Payments and credits recorded</div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <span style={styles.cardTitle}>Total Qty Value (All Time)</span>
-                <span
-                  style={{
-                    ...styles.badge,
-                    background: "#ecfdf3",
-                    color: palette.success,
-                  }}
-                >
-                  Sales
-                </span>
-              </div>
-              <div style={styles.kpiValue}>
-                ₨ {safeNum(totalSalesValue).toLocaleString()}
-              </div>
-              <div style={styles.kpiSub}>
-                Based on SALES entries (debit amounts only)
-              </div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <span style={styles.cardTitle}>Total Qty Sold (All Time)</span>
-              </div>
-              <div style={styles.kpiValue}>
-                {safeNum(totalSalesQty).toLocaleString()}
-              </div>
-              <div style={styles.kpiSub}>
-                Sum of quantity across SALES entries
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Charts Row */}
-        <div style={{ marginTop: "18px" }}>
-          <div style={styles.sectionTitleRow}>
-            <div style={styles.sectionTitle}>Sales Analytics</div>
-            <span style={styles.badge}>Last 14 days & 6 months</span>
-          </div>
-
-          <div style={styles.grid2}>
-            {/* Daily line */}
-            <div style={styles.chartBox}>
-              <div style={styles.chartTitle}>Daily Sales Trend</div>
-              <div style={styles.chartSub}>
-                Last 14 days (based on SALES)
-              </div>
-              <Line data={dailyLineData} options={lineOptions} />
-            </div>
-
-            {/* Right column charts */}
-            <div style={{ display: "grid", gap: "14px" }}>
-              {/* Monthly bar */}
-              <div style={styles.chartBox}>
-                <div style={styles.chartTitle}>Monthly Sales Summary</div>
-                <div style={styles.chartSub}>Last 6 months</div>
-                <Bar data={monthlyBarData} options={barOptions} />
-              </div>
-
-              {/* Payment split pie */}
-              <div style={styles.chartBox}>
-                <div style={styles.chartTitle}>Sales by Payment Type</div>
-                <div style={styles.chartSub}>
-                  Distribution of sales value
+          {summary && (
+            <div style={styles.gridAuto}>
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <span style={styles.cardTitle}>Total Clients</span>
+                  <span style={styles.badge}>Active</span>
                 </div>
-                <Pie data={paymentPieData} options={pieOptions} />
+                <div style={styles.kpiValue}>{summary.totalClients}</div>
+                <div style={styles.kpiSub}>All unique account names</div>
+              </div>
+
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <span style={styles.cardTitle}>Total Entries</span>
+                </div>
+                <div style={styles.kpiValue}>{summary.totalEntries}</div>
+                <div style={styles.kpiSub}>Across all ledger types</div>
+              </div>
+
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <span style={styles.cardTitle}>Total Receivable</span>
+                </div>
+                <div style={styles.kpiValue}>
+                  ₨ {safeNum(summary.totalDebit).toLocaleString()}
+                </div>
+                <div style={styles.kpiSub}>Sum of absolute closing balances</div>
+              </div>
+
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <span style={styles.cardTitle}>Total Credit</span>
+                </div>
+                <div style={styles.kpiValue}>
+                  ₨ {safeNum(summary.totalCredit).toLocaleString()}
+                </div>
+                <div style={styles.kpiSub}>Payments and credits recorded</div>
+              </div>
+
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <span style={styles.cardTitle}>Total Sales Value</span>
+                  <span
+                    style={{
+                      ...styles.badge,
+                      background: palette.successLight,
+                      color: palette.success,
+                    }}
+                  >
+                    All Time
+                  </span>
+                </div>
+                <div style={styles.kpiValue}>
+                  ₨ {safeNum(totalSalesValue).toLocaleString()}
+                </div>
+                <div style={styles.kpiSub}>
+                  Based on SALES entries (debit amounts only)
+                </div>
+              </div>
+
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <span style={styles.cardTitle}>Total Qty Sold</span>
+                </div>
+                <div style={styles.kpiValue}>
+                  {safeNum(totalSalesQty).toLocaleString()}
+                </div>
+                <div style={styles.kpiSub}>
+                  Sum of quantity across SALES entries
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginTop: "32px" }}>
+            <div style={styles.sectionTitleRow}>
+              <div style={styles.sectionTitle}>Sales Analytics</div>
+              <span style={styles.badge}>Last 14 days & 6 months</span>
+            </div>
+
+            <div style={styles.grid2}>
+              <div style={styles.chartBox}>
+                <div style={styles.chartTitle}>Daily Sales Trend</div>
+                <div style={styles.chartSub}>
+                  Last 14 days (based on SALES)
+                </div>
+                <Line data={dailyLineData} options={lineOptions} />
+              </div>
+
+              <div style={{ display: "grid", gap: "20px" }}>
+                <div style={styles.chartBox}>
+                  <div style={styles.chartTitle}>Monthly Sales Summary</div>
+                  <div style={styles.chartSub}>Last 6 months</div>
+                  <Bar data={monthlyBarData} options={barOptions} />
+                </div>
+
+                <div style={styles.chartBox}>
+                  <div style={styles.chartTitle}>Sales by Payment Type</div>
+                  <div style={styles.chartSub}>
+                    Distribution of sales value
+                  </div>
+                  <Pie data={paymentPieData} options={pieOptions} />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Clients section */}
-        <div style={styles.sectionTitleRow}>
-          <div style={styles.sectionTitle}>Clients</div>
-          <input
-            style={styles.searchInput}
-            type="text"
-            placeholder="Search client by name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+          <div style={styles.sectionTitleRow}>
+            <div style={styles.sectionTitle}>Clients</div>
+            <input
+              style={styles.searchInput}
+              type="text"
+              placeholder="Search client by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
-        <div style={styles.tableWrap}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Account Name</th>
-                <th style={styles.th}>Last Date</th>
-                <th style={styles.th}>Closing Balance</th>
-                <th style={styles.th}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredClients.map((c, idx) => (
-                <tr
-                  key={c.accountName}
-                  style={{ background: idx % 2 ? "#fcfdff" : "#fff" }}
-                >
-                  <td style={styles.td}>
-                    <Link
-                      to={`/clients/${encodeURIComponent(c.accountName)}`}
-                      style={{
-                        color: palette.primary,
-                        fontWeight: "700",
-                        textDecoration: "none",
-                      }}
-                    >
-                      {c.accountName}
-                    </Link>
-                  </td>
-                  <td style={{ ...styles.td, ...styles.rowMuted }}>
-                    {c.lastDate ? c.lastDate.toLocaleDateString() : "-"}
-                  </td>
-                  <td style={styles.td}>
-                    {typeof c.closingBalance === "number"
-                      ? c.closingBalance.toLocaleString()
-                      : "-"}
-                  </td>
-                  <td style={styles.td}>
-                    <button
-                      style={styles.btn}
-                      onClick={() =>
-                        navigate(`/clients/${encodeURIComponent(c.accountName)}`)
-                      }
-                    >
-                      View Ledger
-                    </button>
-                    <span style={{ display: "inline-block", width: 6 }} />
-                    <button
-                      style={{ ...styles.btnGhost }}
-                      onClick={() => handleEditName(c.accountName)}
-                    >
-                      Edit Name
-                    </button>
-                  </td>
-                </tr>
-              ))}
+          <div style={styles.legend}>
+            <div style={styles.legendItem}>
+              <span
+                style={{
+                  ...styles.statusIndicator,
+                  background: palette.success,
+                }}
+              />
+              Active (Recent activity)
+            </div>
+            <div style={styles.legendItem}>
+              <span
+                style={{
+                  ...styles.statusIndicator,
+                  background: palette.warning,
+                }}
+              />
+              Warning (10+ days inactive with balance)
+            </div>
+            <div style={styles.legendItem}>
+              <span
+                style={{
+                  ...styles.statusIndicator,
+                  background: palette.danger,
+                }}
+              />
+              Alert (15+ days inactive with balance)
+            </div>
+          </div>
 
-              {filteredClients.length === 0 && !loading && (
+          <div style={styles.tableWrap}>
+            <table style={styles.table}>
+              <thead>
                 <tr>
-                  <td style={styles.td} colSpan={4}>
-                    <div style={styles.empty}>No clients found.</div>
-                  </td>
+                  <th style={styles.th}>Account Name</th>
+                  <th style={styles.th}>Last Date</th>
+                  <th style={styles.th}>Days Inactive</th>
+                  <th style={styles.th}>Closing Balance</th>
+                  <th style={styles.th}>Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredClients.map((c, idx) => {
+                  const status = getClientStatus(c.closingBalance, c.lastDate);
+                  const daysSince = getDaysSinceLastEntry(c.lastDate);
+                  
+                  let rowStyle = {
+                    background: idx % 2 ? "#fcfdff" : "#fff",
+                  };
+                  
+                  if (status === "warning") {
+                    rowStyle = { ...rowStyle, ...styles.warningRow };
+                  } else if (status === "danger") {
+                    rowStyle = { ...rowStyle, ...styles.dangerRow };
+                  }
+
+                  return (
+                    <tr key={c.accountName} style={rowStyle}>
+                      <td style={styles.td}>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <span
+                            style={{
+                              ...styles.statusIndicator,
+                              background:
+                                status === "danger"
+                                  ? palette.danger
+                                  : status === "warning"
+                                  ? palette.warning
+                                  : palette.success,
+                            }}
+                          />
+                          <Link
+                            to={`/clients/${encodeURIComponent(c.accountName)}`}
+                            style={{
+                              color: palette.primary,
+                              fontWeight: "700",
+                              textDecoration: "none",
+                            }}
+                          >
+                            {c.accountName}
+                          </Link>
+                        </div>
+                      </td>
+                      <td style={{ ...styles.td, ...styles.rowMuted }}>
+                        {c.lastDate ? c.lastDate.toLocaleDateString() : "-"}
+                      </td>
+                      <td style={styles.td}>
+                        {daysSince !== null ? (
+                          <span
+                            style={{
+                              fontWeight: "700",
+                              color:
+                                status === "danger"
+                                  ? palette.danger
+                                  : status === "warning"
+                                  ? palette.warningDark
+                                  : palette.success,
+                            }}
+                          >
+                            {daysSince} days
+                          </span>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td style={styles.td}>
+                        <span
+                          style={{
+                            fontWeight: "700",
+                            color:
+                              c.closingBalance > 0
+                                ? palette.text
+                                : palette.muted,
+                          }}
+                        >
+                          ₨{" "}
+                          {typeof c.closingBalance === "number"
+                            ? c.closingBalance.toLocaleString()
+                            : "-"}
+                        </span>
+                      </td>
+                      <td style={styles.td}>
+                        <button
+                          style={styles.btnSmall}
+                          onClick={() =>
+                            navigate(
+                              `/clients/${encodeURIComponent(c.accountName)}`
+                            )
+                          }
+                        >
+                          View Ledger
+                        </button>
+                        <span style={{ display: "inline-block", width: 8 }} />
+                        <button
+                          style={styles.btnGhostSmall}
+                          onClick={() => handleEditName(c.accountName)}
+                        >
+                          Edit Name
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                {filteredClients.length === 0 && !loading && (
+                  <tr>
+                    <td style={styles.td} colSpan={5}>
+                      <div style={styles.empty}>No clients found.</div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
