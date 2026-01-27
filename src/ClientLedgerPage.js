@@ -1,22 +1,30 @@
-// src/ClientLedgerPage.js - FIXED: PDF Balance column always fits (mobile-friendly) + Last Date PDF + Summary includes Total Qty
+// src/ClientLedgerPage.js
+// ✅ UX IMPROVED (structure + spacing + sticky header + zebra rows + hover + badges)
+// ✅ EDIT opens SweetAlert2 popup and SAVES ONCE (fix double-save issue)
+// ✅ PDF untouched
+
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "./api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import Swal from "sweetalert2";
 
 /* ----------------------------- */
 /* ✅ UI UPGRADE (NO LOGIC CHANGE) */
 /* ----------------------------- */
 
 const outerBox = {
-  maxWidth: "1200px",
+  maxWidth: "1250px",
   margin: "24px auto 60px",
-  padding: "24px",
-  background: "linear-gradient(180deg, #f7f9ff 0%, #f5f7fb 100%)",
-  borderRadius: "14px",
+  padding: "22px",
+  background:
+    "radial-gradient(1000px 500px at 10% 10%, #eef3ff 0%, transparent 55%)," +
+    "radial-gradient(900px 500px at 90% 20%, #f3f7ff 0%, transparent 55%)," +
+    "linear-gradient(180deg, #f7f9ff 0%, #f5f7fb 100%)",
+  borderRadius: "16px",
   border: "1px solid #e6ebf5",
-  boxShadow: "0 10px 26px rgba(16, 24, 40, 0.06)",
+  boxShadow: "0 12px 30px rgba(16, 24, 40, 0.08)",
 };
 
 const headerRow = {
@@ -25,105 +33,91 @@ const headerRow = {
   alignItems: "center",
   gap: "12px",
   padding: "14px 14px",
-  background: "#ffffff",
-  borderRadius: "12px",
+  background: "rgba(255,255,255,0.92)",
+  backdropFilter: "blur(6px)",
+  borderRadius: "14px",
   border: "1px solid #e8edf7",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
-  marginBottom: "18px",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+  marginBottom: "14px",
 };
 
 const title = {
-  fontSize: "28px",
-  fontWeight: "800",
+  fontSize: "26px",
+  fontWeight: "900",
   textAlign: "center",
   color: "#0f1f3d",
   letterSpacing: "0.2px",
   padding: "0 8px",
-  lineHeight: 1.2,
+  lineHeight: 1.12,
 };
 
 const button = {
   padding: "9px 14px",
-  borderRadius: "8px",
+  borderRadius: "10px",
   border: "1px solid rgba(255,255,255,0.25)",
   cursor: "pointer",
-  background:
-    "linear-gradient(135deg, #2f5597 0%, #1f3b7a 50%, #2f5597 100%)",
+  background: "linear-gradient(135deg, #2f5597 0%, #1f3b7a 50%, #2f5597 100%)",
   color: "#fff",
-  fontWeight: "700",
+  fontWeight: "800",
   fontSize: "12px",
   letterSpacing: "0.2px",
   transition: "all .2s ease",
-  boxShadow: "0 6px 14px rgba(47, 85, 151, 0.22)",
+  boxShadow: "0 8px 18px rgba(47, 85, 151, 0.24)",
 };
 
 const buttonSecondary = {
   ...button,
   background: "linear-gradient(135deg, #6c757d 0%, #5a6268 100%)",
-  boxShadow: "0 6px 14px rgba(108, 117, 125, 0.22)",
+  boxShadow: "0 8px 18px rgba(108, 117, 125, 0.22)",
 };
 
 const buttonDanger = {
   ...button,
   background: "linear-gradient(135deg, #dc3545 0%, #b02a37 100%)",
-  boxShadow: "0 6px 14px rgba(220, 53, 69, 0.22)",
+  boxShadow: "0 8px 18px rgba(220, 53, 69, 0.22)",
 };
 
 const buttonMuted = {
   ...button,
   background: "linear-gradient(135deg, #8b95a7 0%, #6f7888 100%)",
-  boxShadow: "0 6px 14px rgba(111, 120, 136, 0.22)",
+  boxShadow: "0 8px 18px rgba(111, 120, 136, 0.22)",
 };
 
-const tableWrap = {
-  background: "#fff",
-  borderRadius: "12px",
+const topTools = {
+  display: "flex",
+  gap: "10px",
+  flexWrap: "wrap",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: "12px 12px",
+  marginBottom: "12px",
   border: "1px solid #e8edf7",
-  overflow: "hidden",
-  boxShadow: "0 6px 18px rgba(16, 24, 40, 0.04)",
-};
-
-const table = {
-  width: "100%",
-  borderCollapse: "separate",
-  borderSpacing: "0",
-};
-
-const thtd = {
-  borderBottom: "1px solid #edf1f7",
-  padding: "10px 8px",
-  fontSize: "12px",
-  textAlign: "center",
-  color: "#111827",
-  whiteSpace: "nowrap",
-};
-
-const headerCell = {
-  ...thtd,
-  background: "#f2f6ff",
-  fontWeight: "800",
-  color: "#1f3b7a",
-  textTransform: "uppercase",
-  fontSize: "10.5px",
-  letterSpacing: "0.5px",
-  borderBottom: "1px solid #dde6f6",
+  borderRadius: "14px",
+  background: "rgba(255,255,255,0.88)",
+  boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
 };
 
 const inputBase = {
   width: "100%",
   minWidth: "90px",
-  padding: "7px 8px",
-  fontSize: "11.5px",
-  borderRadius: "6px",
+  padding: "9px 10px",
+  fontSize: "12px",
+  borderRadius: "10px",
   border: "1px solid #d9e2f2",
   outline: "none",
   background: "#ffffff",
   transition: "border .15s ease, box-shadow .15s ease",
 };
 
-const selectBase = {
-  ...inputBase,
-  cursor: "pointer",
+const badgeInfo = {
+  display: "inline-block",
+  padding: "4px 10px",
+  borderRadius: "999px",
+  fontSize: "10.5px",
+  fontWeight: "800",
+  background: "#eef5ff",
+  color: "#1f3b7a",
+  border: "1px solid #dbe7ff",
 };
 
 const smallHint = {
@@ -132,28 +126,68 @@ const smallHint = {
   marginTop: "4px",
 };
 
-const badgeInfo = {
-  display: "inline-block",
-  padding: "3px 8px",
-  borderRadius: "999px",
-  fontSize: "10px",
-  fontWeight: "700",
-  background: "#eef5ff",
-  color: "#1f3b7a",
-  border: "1px solid #dbe7ff",
-};
-
 const manualCard = {
   background: "#ffffff",
-  borderRadius: "12px",
+  borderRadius: "14px",
   border: "1px solid #e8edf7",
   boxShadow: "0 6px 18px rgba(16, 24, 40, 0.04)",
   padding: "14px",
-  marginBottom: "18px",
+  marginBottom: "14px",
+};
+
+const kpiRow = {
+  display: "grid",
+  gridTemplateColumns: "repeat(4, minmax(160px, 1fr))",
+  gap: "10px",
+  padding: "6px 0 12px",
+};
+
+const kpiCard = {
+  background: "rgba(255,255,255,0.95)",
+  border: "1px solid #e8edf7",
+  borderRadius: "14px",
+  padding: "12px",
+  boxShadow: "0 6px 16px rgba(16, 24, 40, 0.05)",
+};
+
+const kpiLabel = { fontSize: "11px", color: "#64748b", fontWeight: 900 };
+const kpiValue = { fontSize: "18px", color: "#0f1f3d", fontWeight: 900, marginTop: 6 };
+
+const tableWrap = {
+  background: "#fff",
+  borderRadius: "14px",
+  border: "1px solid #e8edf7",
+  overflow: "hidden",
+  boxShadow: "0 10px 22px rgba(16, 24, 40, 0.05)",
+};
+
+const table = { width: "100%", borderCollapse: "separate", borderSpacing: "0" };
+
+const thtd = {
+  borderBottom: "1px solid #edf1f7",
+  padding: "11px 10px",
+  fontSize: "12px",
+  textAlign: "center",
+  color: "#111827",
+  whiteSpace: "nowrap",
+};
+
+const headerCell = {
+  ...thtd,
+  position: "sticky",
+  top: 0,
+  zIndex: 5,
+  background: "#f2f6ff",
+  fontWeight: "900",
+  color: "#1f3b7a",
+  textTransform: "uppercase",
+  fontSize: "10.5px",
+  letterSpacing: "0.55px",
+  borderBottom: "1px solid #dde6f6",
 };
 
 /* ----------------------------- */
-/* ✅ LOGIC */
+/* ✅ LOGIC HELPERS */
 /* ----------------------------- */
 
 function computeClosing(entries) {
@@ -197,6 +231,29 @@ function safeNum(v) {
   return Number.isFinite(n) ? n : 0;
 }
 
+/* ✅ NEW: robust number parsing (handles "3,318") */
+function n(v) {
+  const x = Number(String(v ?? "").replace(/,/g, ""));
+  return Number.isFinite(x) ? x : 0;
+}
+
+/* ✅ NEW: pick first valid numeric field */
+function pickNum(obj, keys) {
+  for (const k of keys) {
+    const v = obj?.[k];
+    if (v !== undefined && v !== null && String(v).trim() !== "") {
+      return n(v);
+    }
+  }
+  return null;
+}
+
+const clamp0 = (v) => (v < 0 ? 0 : v);
+
+/* ----------------------------- */
+/* ✅ COMPONENT */
+/* ----------------------------- */
+
 function ClientLedgerPage() {
   const { accountName } = useParams();
   const decodedName = decodeURIComponent(accountName);
@@ -206,35 +263,20 @@ function ClientLedgerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({
-    date: "",
-    description: "",
-    productType: "",
-    quantity: "",
-    rate: "",
-    loading: "",
-    credit: "",
-    paymentType: "",
-    bankName: "",
-    chequeNo: "",
-    chequeDate: "",
-  });
-
   const [productTypes, setProductTypes] = useState([]);
   const [availableByType, setAvailableByType] = useState({});
   const [stockLoading, setStockLoading] = useState(false);
 
-  const [originalQty, setOriginalQty] = useState(0);
-  const [originalProductType, setOriginalProductType] = useState("");
-
-  // ✅ Manual debit (old sell) UI + state (no stock selection)
+  // ✅ Manual debit (old sell)
   const [showManualDebit, setShowManualDebit] = useState(false);
   const [manualForm, setManualForm] = useState({
     date: formatDateForInput(new Date()),
     description: "",
     debit: "",
   });
+
+  // ✅ Search
+  const [search, setSearch] = useState("");
 
   const loadEntries = async () => {
     try {
@@ -250,8 +292,7 @@ function ClientLedgerPage() {
         },
       });
 
-      const withClosing = computeClosing(res.data || []);
-      setEntries(withClosing);
+      setEntries(computeClosing(res.data || []));
     } catch (err) {
       console.error(err);
       setError("Error loading ledger entries.");
@@ -260,33 +301,58 @@ function ClientLedgerPage() {
     }
   };
 
-  const loadStock = async () => {
-    try {
-      setStockLoading(true);
-      const res = await api.get("/api/stock");
-      const list = res.data || [];
 
-      const typesSet = new Set();
-      const availableMap = {};
 
-      list.forEach((s) => {
-        if (s.productType) typesSet.add(s.productType);
 
-        if (s.productType && s.status === "AVAILABLE") {
-          const q =
-            Number(s.remainingQuantity != null ? s.remainingQuantity : s.quantity) || 0;
-          availableMap[s.productType] = (availableMap[s.productType] || 0) + q;
-        }
-      });
 
-      setProductTypes(Array.from(typesSet));
-      setAvailableByType(availableMap);
-    } catch (err) {
-      console.error("Error loading stock", err);
-    } finally {
-      setStockLoading(false);
-    }
-  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /* ✅ FIXED: Available qty SAME as NewLedgerEntryPage (sum all stock.quantity incl negatives) */
+const loadStock = async () => {
+  try {
+    setStockLoading(true);
+    const res = await api.get("/api/stock");
+    const list = res.data || [];
+
+    const typesSet = new Set();
+    const availableMap = {};
+
+    list.forEach((s) => {
+      const type = (s.productType || "").trim();
+      if (!type) return;
+
+      typesSet.add(type);
+
+      // IMPORTANT: stock.quantity can be + (purchase/return) OR - (sale)
+      const q = n(s.quantity); // uses your comma-safe parser
+      availableMap[type] = (availableMap[type] || 0) + q;
+    });
+
+    // Never show negative available in UI
+    Object.keys(availableMap).forEach((t) => {
+      availableMap[t] = clamp0(availableMap[t]);
+    });
+
+    setProductTypes(Array.from(typesSet).sort());
+    setAvailableByType(availableMap);
+  } catch (err) {
+    console.error("Error loading stock", err);
+  } finally {
+    setStockLoading(false);
+  }
+};
 
   useEffect(() => {
     loadEntries();
@@ -295,88 +361,48 @@ function ClientLedgerPage() {
   }, [decodedName]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this entry?")) return;
+    const res = await Swal.fire({
+      title: "Delete this entry?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+    });
+    if (!res.isConfirmed) return;
+
     try {
       await api.delete(`/api/ledger/${id}`);
       await loadEntries();
       await loadStock();
+      Swal.fire({ icon: "success", title: "Deleted", timer: 900, showConfirmButton: false });
     } catch (err) {
       console.error(err);
-      alert("Error deleting entry.");
+      Swal.fire({ icon: "error", title: "Error", text: "Error deleting entry." });
     }
   };
 
-  const startEdit = (entry) => {
-    const entryId = entry._id || entry.id;
-    const q = entry.qty ?? entry.quantity ?? 0;
+  /* ----------------------------- */
+  /* ✅ EDIT SAVE (FIXED: saves once) */
+  /* ----------------------------- */
 
-    setEditingId(entryId);
-    setOriginalQty(Number(q) || 0);
-    setOriginalProductType(entry.productType || "");
-
-    setEditForm({
-      date: formatDateForInput(entry.date),
-      description: entry.description || "",
-      productType: entry.productType || "",
-      quantity: q,
-      rate: entry.rate || "",
-      loading: entry.loading || "",
-      credit: entry.credit || "",
-      paymentType: entry.paymentType || "",
-      bankName: entry.bankName || "",
-      chequeNo: entry.chequeNo || "",
-      chequeDate: entry.chequeDate ? formatDateForInput(entry.chequeDate) : "",
-    });
-  };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditForm({
-      date: "",
-      description: "",
-      productType: "",
-      quantity: "",
-      rate: "",
-      loading: "",
-      credit: "",
-      paymentType: "CASH",
-      bankName: "",
-      chequeNo: "",
-      chequeDate: "",
-    });
-  };
-
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const qtyNum = Number(editForm.quantity) || 0;
-  const rateNum = Number(editForm.rate) || 0;
-  const loadingNum = Number(editForm.loading) || 0;
-  const editDebit = qtyNum * rateNum + loadingNum;
-
-  const createStockAdjustment = async (adj) => {
+  const createStockAdjustment = async (adj, ctx) => {
     const q = Number(adj?.quantity) || 0;
     const pType = adj?.productType;
-
     if (!pType || q === 0) return;
 
     return api.post("/api/stock", {
       productType: pType,
       status: "AVAILABLE",
 
-      date: editForm.date,
-      purchaseDate: editForm.date,
+      date: ctx.date,
+      purchaseDate: ctx.date,
 
       quantity: q,
       remainingQuantity: q,
 
-      rate: rateNum,
-      purchaseRate: rateNum,
+      rate: ctx.rate,
+      purchaseRate: ctx.rate,
 
       supplierName: "AUTO-ADJUST",
       supplierInvoiceNo: "",
@@ -393,61 +419,58 @@ function ClientLedgerPage() {
     });
   };
 
-  const saveEdit = async () => {
+  const saveEditDirect = async (entryId, oldQty, oldType, values) => {
     try {
-      if (!editingId) return;
+      if (!entryId) return;
 
-      const newType = editForm.productType;
-      const oldType = originalProductType || newType;
+      const qtyNumLocal = Number(values.quantity) || 0;
+      const rateNumLocal = Number(values.rate) || 0;
+      const loadingNumLocal = Number(values.loading) || 0;
+      const editDebitLocal = qtyNumLocal * rateNumLocal + loadingNumLocal;
+
+      const newType = (values.productType || "").trim();
+      const prevType = (oldType || newType || "").trim();
 
       const stockAdjustments = [];
-      const isStockRelatedEdit = !!newType || !!oldType || originalQty !== 0 || qtyNum !== 0;
+      const isStockRelatedEdit =
+        !!newType || !!prevType || (Number(oldQty) || 0) !== 0 || qtyNumLocal !== 0;
 
       if (isStockRelatedEdit) {
-        if (newType === oldType) {
-          const availableForType =
-            newType && availableByType[newType] ? availableByType[newType] : 0;
-
-          const deltaQty = qtyNum - originalQty;
+        if (newType === prevType) {
+          const availableForType = newType && availableByType[newType] ? availableByType[newType] : 0;
+          const deltaQty = qtyNumLocal - (Number(oldQty) || 0);
 
           if (deltaQty > 0 && deltaQty > availableForType) {
-            alert(
-              `Not enough available stock for ${newType}. ` +
-                `Available: ${availableForType}, trying to sell extra: ${deltaQty}`
-            );
+            await Swal.fire({
+              icon: "warning",
+              title: "Not enough stock",
+              text: `Type: ${newType} | Available: ${availableForType} | Extra needed: ${deltaQty}`,
+            });
             return;
           }
 
           if (deltaQty !== 0 && newType) {
-            stockAdjustments.push({
-              productType: newType,
-              quantity: -deltaQty,
-            });
+            stockAdjustments.push({ productType: newType, quantity: -deltaQty });
           }
         } else {
-          if (oldType && originalQty) {
-            stockAdjustments.push({
-              productType: oldType,
-              quantity: originalQty,
-            });
+          if (prevType && (Number(oldQty) || 0)) {
+            stockAdjustments.push({ productType: prevType, quantity: Number(oldQty) || 0 });
           }
 
           if (newType) {
             const availableForNew = availableByType[newType] ? availableByType[newType] : 0;
 
-            if (qtyNum > 0 && qtyNum > availableForNew) {
-              alert(
-                `Not enough available stock for ${newType}. ` +
-                  `Available: ${availableForNew}, trying to sell: ${qtyNum}`
-              );
+            if (qtyNumLocal > 0 && qtyNumLocal > availableForNew) {
+              await Swal.fire({
+                icon: "warning",
+                title: "Not enough stock",
+                text: `Type: ${newType} | Available: ${availableForNew} | Trying to sell: ${qtyNumLocal}`,
+              });
               return;
             }
 
-            if (qtyNum !== 0) {
-              stockAdjustments.push({
-                productType: newType,
-                quantity: -qtyNum,
-              });
+            if (qtyNumLocal !== 0) {
+              stockAdjustments.push({ productType: newType, quantity: -qtyNumLocal });
             }
           }
         }
@@ -456,38 +479,294 @@ function ClientLedgerPage() {
       const payload = {
         accountName: decodedName,
         ledgerType: "SALES",
-        date: editForm.date,
-        description: editForm.description,
+        date: values.date,
+        description: values.description,
         productType: newType,
-        quantity: qtyNum,
-        rate: rateNum,
-        loading: loadingNum,
-        debit: editDebit,
-        credit: Number(editForm.credit) || 0,
-        paymentType: editForm.paymentType || "CASH",
-        bankName: editForm.paymentType === "BANK" ? editForm.bankName : "",
-        chequeNo: editForm.paymentType === "CHEQUE" ? editForm.chequeNo : "",
-        chequeDate:
-          editForm.paymentType === "CHEQUE" && editForm.chequeDate ? editForm.chequeDate : null,
+        quantity: qtyNumLocal,
+        rate: rateNumLocal,
+        loading: loadingNumLocal,
+        debit: editDebitLocal,
+        credit: Number(values.credit) || 0,
+        paymentType: values.paymentType || "CASH",
+        bankName: values.paymentType === "BANK" ? values.bankName : "",
+        chequeNo: values.paymentType === "CHEQUE" ? values.chequeNo : "",
+        chequeDate: values.paymentType === "CHEQUE" && values.chequeDate ? values.chequeDate : null,
       };
 
-      await api.put(`/api/ledger/${editingId}`, payload);
+      await api.put(`/api/ledger/${entryId}`, payload);
 
       if (stockAdjustments.length > 0) {
-        await Promise.all(stockAdjustments.map(createStockAdjustment));
+        await Promise.all(
+          stockAdjustments.map((adj) =>
+            createStockAdjustment(adj, { date: values.date, rate: rateNumLocal })
+          )
+        );
       }
-
-      setEditingId(null);
 
       await loadEntries();
       await loadStock();
+
+      Swal.fire({ icon: "success", title: "Updated", timer: 900, showConfirmButton: false });
     } catch (err) {
       console.error(err);
-      alert("Error updating entry.");
+      Swal.fire({ icon: "error", title: "Error", text: "Error updating entry." });
     }
   };
 
-  // ✅ Manual debit save
+  const openEditPopup = async (entry) => {
+    const entryId = entry._id || entry.id;
+    const oldQty = Number(entry.qty ?? entry.quantity ?? 0) || 0;
+    const oldType = entry.productType || "";
+
+    const html = `
+      <div style="text-align:left">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Date</label>
+            <input id="sw_date" type="date" value="${formatDateForInput(entry.date) || ""}"
+              style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Payment Type</label>
+            <select id="sw_payment" style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none">
+              <option value="CASH" ${(entry.paymentType || "CASH") === "CASH" ? "selected" : ""}>CASH</option>
+              <option value="BANK" ${entry.paymentType === "BANK" ? "selected" : ""}>BANK-Transfer</option>
+              <option value="CHEQUE" ${entry.paymentType === "CHEQUE" ? "selected" : ""}>Check Payment</option>
+              <option value="--" ${entry.paymentType === "--" ? "selected" : ""}>---</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label style="font-size:11px;font-weight:900;color:#1f3b7a">Description</label>
+          <input id="sw_desc" type="text" value="${(entry.description || "").replace(/"/g, "&quot;")}"
+            style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none" />
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;margin-top:10px">
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Product Type</label>
+            <select id="sw_type" style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none">
+              <option value="">Select Type</option>
+              ${productTypes
+                .map(
+                  (t) =>
+                    `<option value="${t}" ${t === (entry.productType || "") ? "selected" : ""}>${t}</option>`
+                )
+                .join("")}
+            </select>
+            <div id="sw_stock_hint" style="margin-top:6px;font-size:10px;color:#6b7280"></div>
+          </div>
+
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Quantity</label>
+            <input id="sw_qty" type="number" value="${oldQty}"
+              style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none" />
+          </div>
+
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Rate</label>
+            <input id="sw_rate" type="number" value="${Number(entry.rate || 0) || 0}"
+              style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none" />
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px">
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Loading</label>
+            <input id="sw_loading" type="number" value="${Number(entry.loading || 0) || 0}"
+              style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Credit</label>
+            <input id="sw_credit" type="number" value="${Number(entry.credit || 0) || 0}"
+              style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Debit (Auto)</label>
+            <input id="sw_debit" type="text"
+              value="${oldQty * (Number(entry.rate || 0) || 0) + (Number(entry.loading || 0) || 0)}"
+              readonly
+              style="width:100%;padding:10px;border:1px solid #e8edf7;border-radius:10px;outline:none;background:#f6f8ff;font-weight:900;color:#1f3b7a" />
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Bank (BANK)</label>
+            <input id="sw_bank" type="text" value="${(entry.bankName || "").replace(/"/g, "&quot;")}"
+              style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Cheque No (CHEQUE)</label>
+            <input id="sw_cheque" type="text" value="${(entry.chequeNo || "").replace(/"/g, "&quot;")}"
+              style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:900;color:#1f3b7a">Cheque Date (CHEQUE)</label>
+            <input id="sw_chequeDate" type="date" value="${entry.chequeDate ? formatDateForInput(entry.chequeDate) : ""}"
+              style="width:100%;padding:10px;border:1px solid #d9e2f2;border-radius:10px;outline:none" />
+          </div>
+        </div>
+      </div>
+    `;
+
+    const res = await Swal.fire({
+      title: "Edit Entry",
+      html,
+      width: 900,
+      showCancelButton: true,
+      confirmButtonText: "Save Changes",
+      cancelButtonText: "Cancel",
+      focusConfirm: false,
+      didOpen: () => {
+        const $ = (id) => document.getElementById(id);
+
+        const typeEl = $("sw_type");
+        const qtyEl = $("sw_qty");
+        const rateEl = $("sw_rate");
+        const loadingEl = $("sw_loading");
+        const debitEl = $("sw_debit");
+        const stockHintEl = $("sw_stock_hint");
+
+        const paymentEl = $("sw_payment");
+        const bankEl = $("sw_bank");
+        const chequeEl = $("sw_cheque");
+        const chequeDateEl = $("sw_chequeDate");
+
+        const refreshDebit = () => {
+          const q = Number(qtyEl.value) || 0;
+          const r = Number(rateEl.value) || 0;
+          const l = Number(loadingEl.value) || 0;
+          debitEl.value = (q * r + l).toLocaleString("en-US");
+        };
+
+        const refreshStockHint = () => {
+          const t = (typeEl.value || "").trim();
+          if (!t) {
+            stockHintEl.innerHTML = "";
+            return;
+          }
+          const availableForType = availableByType[t] ? availableByType[t] : 0;
+          stockHintEl.innerHTML = stockLoading
+            ? "Stock loading..."
+            : `Available: <b>${Number(availableForType).toLocaleString("en-US")}</b>`;
+        };
+
+        const refreshPaymentFields = () => {
+          const p = (paymentEl.value || "CASH").toUpperCase();
+
+          if (p === "BANK") {
+            bankEl.disabled = false;
+            chequeEl.disabled = true;
+            chequeDateEl.disabled = true;
+          } else if (p === "CHEQUE") {
+            bankEl.disabled = true;
+            chequeEl.disabled = false;
+            chequeDateEl.disabled = false;
+          } else {
+            bankEl.disabled = true;
+            chequeEl.disabled = true;
+            chequeDateEl.disabled = true;
+          }
+
+          if (p !== "BANK") bankEl.value = "";
+          if (p !== "CHEQUE") {
+            chequeEl.value = "";
+            chequeDateEl.value = "";
+          }
+        };
+
+        [qtyEl, rateEl, loadingEl].forEach((el) => el.addEventListener("input", refreshDebit));
+        typeEl.addEventListener("change", refreshStockHint);
+        paymentEl.addEventListener("change", refreshPaymentFields);
+
+        refreshDebit();
+        refreshStockHint();
+        refreshPaymentFields();
+      },
+      preConfirm: () => {
+        const $ = (id) => document.getElementById(id);
+
+        const date = $("sw_date").value;
+        const description = ($("sw_desc").value || "").trim();
+        const productType = ($("sw_type").value || "").trim();
+        const quantity = Number($("sw_qty").value) || 0;
+        const rate = Number($("sw_rate").value) || 0;
+        const loading = Number($("sw_loading").value) || 0;
+        const credit = Number($("sw_credit").value) || 0;
+        const paymentType = ($("sw_payment").value || "CASH").toUpperCase();
+        const bankName = ($("sw_bank").value || "").trim();
+        const chequeNo = ($("sw_cheque").value || "").trim();
+        const chequeDate = $("sw_chequeDate").value || "";
+
+        if (!date) {
+          Swal.showValidationMessage("Please select date.");
+          return;
+        }
+        if (!description) {
+          Swal.showValidationMessage("Please enter description.");
+          return;
+        }
+        if (quantity < 0 || rate < 0 || loading < 0 || credit < 0) {
+          Swal.showValidationMessage("Quantity/Rate/Loading/Credit cannot be negative.");
+          return;
+        }
+
+        // ✅ stock validation (local oldQty/oldType)
+        const newType = productType;
+        const prevType = oldType || newType;
+        const deltaQty = quantity - oldQty;
+
+        if (newType === prevType) {
+          const availableForType = newType && availableByType[newType] ? availableByType[newType] : 0;
+          if (deltaQty > 0 && deltaQty > availableForType) {
+            Swal.showValidationMessage(
+              `Not enough available stock for ${newType}. Available: ${availableForType}, trying to sell extra: ${deltaQty}`
+            );
+            return;
+          }
+        } else {
+          if (newType) {
+            const availableForNew = availableByType[newType] ? availableByType[newType] : 0;
+            if (quantity > 0 && quantity > availableForNew) {
+              Swal.showValidationMessage(
+                `Not enough available stock for ${newType}. Available: ${availableForNew}, trying to sell: ${quantity}`
+              );
+              return;
+            }
+          }
+        }
+
+        const debit = quantity * rate + loading;
+
+        return {
+          date,
+          description,
+          productType,
+          quantity,
+          rate,
+          loading,
+          debit,
+          credit,
+          paymentType,
+          bankName: paymentType === "BANK" ? bankName : "",
+          chequeNo: paymentType === "CHEQUE" ? chequeNo : "",
+          chequeDate: paymentType === "CHEQUE" && chequeDate ? chequeDate : null,
+        };
+      },
+    });
+
+    if (!res.isConfirmed || !res.value) return;
+
+    // ✅ Save ONCE (direct)
+    await saveEditDirect(entryId, oldQty, oldType, res.value);
+  };
+
+  /* ----------------------------- */
+  /* ✅ Manual debit save */
+  /* ----------------------------- */
+
   const handleManualChange = (e) => {
     const { name, value } = e.target;
     setManualForm((prev) => ({ ...prev, [name]: value }));
@@ -499,9 +778,9 @@ function ClientLedgerPage() {
       const desc = (manualForm.description || "").trim();
       const debitVal = Number(manualForm.debit) || 0;
 
-      if (!d) return alert("Please select date.");
-      if (!desc) return alert("Please enter description.");
-      if (debitVal <= 0) return alert("Please enter a valid debit amount.");
+      if (!d) return Swal.fire({ icon: "warning", title: "Select date" });
+      if (!desc) return Swal.fire({ icon: "warning", title: "Enter description" });
+      if (debitVal <= 0) return Swal.fire({ icon: "warning", title: "Enter valid debit" });
 
       await api.post("/api/ledger", {
         accountName: decodedName,
@@ -529,17 +808,19 @@ function ClientLedgerPage() {
 
       await loadEntries();
       await loadStock();
+
+      Swal.fire({ icon: "success", title: "Saved", timer: 900, showConfirmButton: false });
     } catch (err) {
       console.error(err);
-      alert("Error saving manual debit entry.");
+      Swal.fire({ icon: "error", title: "Error", text: "Error saving manual debit entry." });
     }
   };
 
   /* ----------------------------- */
-  /* ✅ PDF HELPERS (FIXED TABLE WIDTH SO LAST BALANCE NEVER CUTS) */
+  /* ✅ PDF HELPERS (UNCHANGED) */
   /* ----------------------------- */
 
-  const lastDateKey = useMemo(() => {
+  const lastDateKeyMemo = useMemo(() => {
     if (!entries || entries.length === 0) return "";
     let max = null;
     for (const e of entries) {
@@ -552,21 +833,16 @@ function ClientLedgerPage() {
   }, [entries]);
 
   const entriesLastDate = useMemo(() => {
-    if (!lastDateKey) return [];
-    return entries.filter((e) => dateKey(e.date) === lastDateKey);
-  }, [entries, lastDateKey]);
+    if (!lastDateKeyMemo) return [];
+    return entries.filter((e) => dateKey(e.date) === lastDateKeyMemo);
+  }, [entries, lastDateKeyMemo]);
 
-  // ✅ Helper: scale column widths to ALWAYS fit inside page width (fixes Balance cut off)
   const getFittingColumnWidths = (availableWidth) => {
-    // Order matches table columns:
-    // Date, Description, Type, Qty, Rate, Loading, Debit, Credit, Payment, Bank, Cheque No, Cheque Date, Balance
     const desired = [58, 150, 58, 34, 38, 46, 54, 54, 52, 52, 52, 52, 60];
-
     const sum = desired.reduce((a, b) => a + b, 0);
     const scale = sum > availableWidth ? availableWidth / sum : 1;
 
-    let scaled = desired.map((w) => Math.max(28, Math.floor(w * scale))); // keep min width
-    // Give any leftover pixels to Description so it uses full width nicely
+    let scaled = desired.map((w) => Math.max(28, Math.floor(w * scale)));
     const scaledSum = scaled.reduce((a, b) => a + b, 0);
     const leftover = Math.floor(availableWidth - scaledSum);
     if (leftover > 0) scaled[1] += leftover;
@@ -585,7 +861,6 @@ function ClientLedgerPage() {
       return;
     }
 
-    // ✅ Keep landscape, but make table fit 100% always
     const doc = new jsPDF("l", "pt", "a4");
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -594,69 +869,36 @@ function ClientLedgerPage() {
     const availableW = pageWidth - margins.left - margins.right;
     const W = getFittingColumnWidths(availableW);
 
-    // Background tint
     doc.setFillColor(247, 250, 255);
     doc.rect(0, 0, pageWidth, pageHeight, "F");
 
-    // Top brand bar
     doc.setFillColor(31, 59, 122);
     doc.rect(0, 0, pageWidth, 78, "F");
 
-    // Accent line
     doc.setFillColor(85, 132, 255);
     doc.rect(0, 78, pageWidth, 3, "F");
 
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(28);
+    doc.setFont("helvetica", "bold");
+    doc.text("AYAN STEEL", 30, 38);
 
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("We Deal in All Kind Of CRC, EG, GP HRC Color Coils Steel Sheets", 30, 56);
 
+    doc.setFontSize(9.2);
+    doc.text(
+      "Arslan Iftikhar: 03229848888 | Atif Iftikhar: 03214097588 | Salman Iftikhar: 03244905087 | Numan Iftikhar: 03224100022",
+      30,
+      68
+    );
 
-
-
-
-
-
-
-
-
-
-// Title: AYAN STEEL
-doc.setTextColor(255, 255, 255);
-doc.setFontSize(28);
-doc.setFont("helvetica", "bold");
-doc.text("AYAN STEEL", 30, 38);
-
-// Subtitle (left)
-doc.setFontSize(10);
-doc.setFont("helvetica", "normal");
-doc.text(
-  "We Deal in All Kind Of CRC, EG, GP HRC Color Coils Steel Sheets",
-  30,
-  56
-);
-
-// ✅ Phones UNDER company name (3rd line)
-doc.setFontSize(9.2);
-doc.setFont("helvetica", "normal");
-doc.text(
-  "Arslan Iftikhar: 03229848888 | Atif Iftikhar: 03214097588 | Salman Iftikhar: 03244905087 | Numan Iftikhar: 03224100022",
-
-  30,
-  68
-);
-
-
-
-
-
-
-
-
-    // Badge (right)
     const badgeText = reportTag || "FULL LEDGER";
     const badgeW = Math.min(240, 9.2 * badgeText.length + 34);
     const badgeH = 22;
     const badgeX = pageWidth - 30 - badgeW;
-const badgeY = (78 - badgeH) / 2;   // = 28
-
+    const badgeY = (78 - badgeH) / 2;
 
     doc.setDrawColor(255, 255, 255);
     doc.setLineWidth(1);
@@ -668,13 +910,11 @@ const badgeY = (78 - badgeH) / 2;   // = 28
     doc.setFontSize(10);
     doc.text(badgeText, badgeX + badgeW / 2, badgeY + 15, { align: "center" });
 
-    // Center report title
     doc.setTextColor(31, 59, 122);
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
     doc.text(reportTitle, pageWidth / 2, 112, { align: "center" });
 
-    // Account pill
     const pillText = `Account: ${decodedName}`;
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
@@ -684,24 +924,16 @@ const badgeY = (78 - badgeH) / 2;   // = 28
     doc.roundedRect(pageWidth / 2 - 210, 122, 420, 30, 10, 10, "FD");
     doc.text(pillText, pageWidth / 2, 142, { align: "center" });
 
-    // Generated on + optional date
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(95, 105, 120);
-    const currentDate = new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    const currentDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     let rangeLine = `Generated on: ${currentDate}`;
     const uniqueKeys = Array.from(new Set(rows.map((r) => dateKey(r.date)).filter(Boolean)));
-    if (uniqueKeys.length === 1) {
-      rangeLine += `  |  Date: ${uniqueKeys[0]}`;
-    }
+    if (uniqueKeys.length === 1) rangeLine += `  |  Date: ${uniqueKeys[0]}`;
     doc.text(rangeLine, pageWidth / 2, 165, { align: "center" });
 
-    // Table body
     const body = rows.map((e) => [
       formatDateForDisplay(e.date),
       e.description || "",
@@ -718,34 +950,17 @@ const badgeY = (78 - badgeH) / 2;   // = 28
       typeof e.closingBalance === "number" ? Number(e.closingBalance).toLocaleString("en-US") : "",
     ]);
 
-    // ✅ Build table (fixed to page width + smaller padding/font so Balance never cuts on mobile)
     autoTable(doc, {
       startY: 180,
-      tableWidth: availableW, // ✅ force fit inside margins
+      tableWidth: availableW,
       margin: { left: margins.left, right: margins.right, bottom: margins.bottom, top: margins.top },
-      head: [
-        [
-          "Date",
-          "Description",
-          "Type",
-          "Qty",
-          "Rate",
-          "Loading",
-          "Debit",
-          "Credit",
-          "Pay",
-          "Bank",
-          "Chq#",
-          "Chq Dt",
-          "Balance",
-        ],
-      ],
+      head: [["Date", "Description", "Type", "Qty", "Rate", "Loading", "Debit", "Credit", "Pay", "Bank", "Chq#", "Chq Dt", "Balance"]],
       body,
       theme: "grid",
       styles: {
         fontSize: 7.2,
-        cellPadding: 3, // ✅ reduced padding so table width stays inside page
-        overflow: "ellipsize", // ✅ prevents stretching columns
+        cellPadding: 3,
+        overflow: "ellipsize",
         cellWidth: "wrap",
         lineColor: [220, 228, 242],
         lineWidth: 0.6,
@@ -762,31 +977,27 @@ const badgeY = (78 - badgeH) / 2;   // = 28
         valign: "middle",
         cellPadding: 4,
       },
-      alternateRowStyles: {
-        fillColor: [248, 250, 255],
-      },
+      alternateRowStyles: { fillColor: [248, 250, 255] },
       columnStyles: {
-        0: { cellWidth: W[0], halign: "center" }, // Date
-        1: { cellWidth: W[1], halign: "left" },   // Desc
-        2: { cellWidth: W[2], halign: "center" }, // Type
-        3: { cellWidth: W[3], halign: "center" }, // Qty
-        4: { cellWidth: W[4], halign: "center" },  // Rate
-        5: { cellWidth: W[5], halign: "center" },  // Loading
-        6: { cellWidth: W[6], halign: "center" },  // Debit
-        7: { cellWidth: W[7], halign: "center" },  // Credit
-        8: { cellWidth: W[8], halign: "center" }, // Payment
-        9: { cellWidth: W[9], halign: "center" }, // Bank
-        10:{ cellWidth: W[10], halign: "center" },// Cheque No
-        11:{ cellWidth: W[11], halign: "center" },// Cheque Date
-        12:{ cellWidth: W[12], halign: "center", fontStyle: "bold" }, // Balance
+        0: { cellWidth: W[0], halign: "center" },
+        1: { cellWidth: W[1], halign: "left" },
+        2: { cellWidth: W[2], halign: "center" },
+        3: { cellWidth: W[3], halign: "center" },
+        4: { cellWidth: W[4], halign: "center" },
+        5: { cellWidth: W[5], halign: "center" },
+        6: { cellWidth: W[6], halign: "center" },
+        7: { cellWidth: W[7], halign: "center" },
+        8: { cellWidth: W[8], halign: "center" },
+        9: { cellWidth: W[9], halign: "center" },
+        10: { cellWidth: W[10], halign: "center" },
+        11: { cellWidth: W[11], halign: "center" },
+        12: { cellWidth: W[12], halign: "center", fontStyle: "bold" },
       },
       didDrawPage: function () {
-        // Footer line
         doc.setDrawColor(210, 220, 235);
         doc.setLineWidth(0.8);
         doc.line(18, pageHeight - 30, pageWidth - 18, pageHeight - 30);
 
-        // Footer text
         const pageCount = doc.internal.getNumberOfPages();
         const currentPage = doc.internal.getCurrentPageInfo().pageNumber;
 
@@ -794,15 +1005,10 @@ const badgeY = (78 - badgeH) / 2;   // = 28
         doc.setTextColor(110, 120, 135);
         doc.setFont("helvetica", "normal");
         doc.text("AYAN STEEL - Confidential Document", 18, pageHeight - 14);
-        doc.text(`Page ${currentPage} of ${pageCount}`, pageWidth - 18, pageHeight - 14, {
-          align: "right",
-        });
+        doc.text(`Page ${currentPage} of ${pageCount}`, pageWidth - 18, pageHeight - 14, { align: "right" });
       },
     });
 
-    /* ----------------------------- */
-    /* ✅ SUMMARY BOX (INCLUDES TOTAL QTY) */
-    /* ----------------------------- */
     const totalDebit = rows.reduce((s, e) => s + safeNum(e.debit), 0);
     const totalCredit = rows.reduce((s, e) => s + safeNum(e.credit), 0);
     const totalQty = rows.reduce((s, e) => s + safeNum(e.qty ?? e.quantity), 0);
@@ -813,7 +1019,7 @@ const badgeY = (78 - badgeH) / 2;   // = 28
         ? safeNum(lastRow.closingBalance)
         : totalCredit - totalDebit;
 
-    const lastY = doc.lastAutoTable && doc.lastAutoTable.finalY ? doc.lastAutoTable.finalY : 180;
+    const lastY = doc.lastAutoTable?.finalY ?? 180;
 
     const boxW = 260;
     const boxH = 110;
@@ -881,10 +1087,35 @@ const badgeY = (78 - badgeH) / 2;   // = 28
     makeLedgerPdf({
       rows: entriesLastDate,
       reportTitle: "CLIENT LEDGER STATEMENT",
-      reportTag: `LAST DATE (${lastDateKey || "—"})`,
-      fileSuffix: `LAST_DATE_${(lastDateKey || "NA").replaceAll("-", "")}`,
+      reportTag: `LAST DATE (${lastDateKeyMemo || "—"})`,
+      fileSuffix: `LAST_DATE_${(lastDateKeyMemo || "NA").replaceAll("-", "")}`,
     });
   };
+
+  /* ----------------------------- */
+  /* ✅ FILTER + KPI */
+  /* ----------------------------- */
+
+  const filteredEntries = useMemo(() => {
+    const q = (search || "").trim().toLowerCase();
+    if (!q) return entries;
+    return entries.filter((e) => {
+      const s = `${formatDateForDisplay(e.date)} ${e.description || ""} ${e.productType || ""} ${
+        e.paymentType || ""
+      } ${e.bankName || ""} ${e.chequeNo || ""}`.toLowerCase();
+      return s.includes(q);
+    });
+  }, [entries, search]);
+
+  const kpis = useMemo(() => {
+    const totalDebit = filteredEntries.reduce((s, e) => s + safeNum(e.debit), 0);
+    const totalCredit = filteredEntries.reduce((s, e) => s + safeNum(e.credit), 0);
+    const totalQty = filteredEntries.reduce((s, e) => s + safeNum(e.qty ?? e.quantity), 0);
+    const last = filteredEntries.length ? filteredEntries[filteredEntries.length - 1] : null;
+    const bal =
+      last && typeof last.closingBalance === "number" ? safeNum(last.closingBalance) : totalCredit - totalDebit;
+    return { totalDebit, totalCredit, totalQty, bal };
+  }, [filteredEntries]);
 
   return (
     <div style={outerBox}>
@@ -904,7 +1135,7 @@ const badgeY = (78 - badgeH) / 2;   // = 28
           {decodedName}
           <div style={{ marginTop: "6px" }}>
             <span style={badgeInfo}>Sales Ledger</span>
-            {lastDateKey ? (
+            {lastDateKeyMemo ? (
               <span
                 style={{
                   ...badgeInfo,
@@ -914,42 +1145,76 @@ const badgeY = (78 - badgeH) / 2;   // = 28
                   color: "#5a2ea6",
                 }}
               >
-                Last Date: {lastDateKey}
+                Last Date: {lastDateKeyMemo}
               </span>
             ) : null}
           </div>
         </div>
 
-        <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-          <button
-            style={buttonSecondary}
-            onClick={handleLastDatePdf}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0px)")}
-            title="Download last date entries PDF (latest date only)"
-            disabled={!lastDateKey}
-          >
+        <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", flexWrap: "wrap" }}>
+          <button style={buttonSecondary} onClick={handleLastDatePdf} disabled={!lastDateKeyMemo}>
             ⬇ Last Date PDF
           </button>
 
           <button
             style={buttonSecondary}
             onClick={() => setShowManualDebit((p) => !p)}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0px)")}
             title="Add old sell debit without stock"
           >
             + Old Sell Debit
           </button>
 
-          <button
-            style={button}
-            onClick={() => navigate(`/clients/${encodeURIComponent(decodedName)}/new-entry`)}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0px)")}
-          >
+          <button style={button} onClick={() => navigate(`/clients/${encodeURIComponent(decodedName)}/new-entry`)}>
             + New Record
           </button>
+        </div>
+      </div>
+
+      <div style={topTools}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ fontWeight: 900, color: "#1f3b7a", fontSize: 12 }}>
+            Records: {filteredEntries.length.toLocaleString("en-US")}
+          </div>
+          {stockLoading ? (
+            <span style={{ ...badgeInfo, background: "#fff7ed", borderColor: "#fed7aa", color: "#9a3412" }}>
+              Stock syncing...
+            </span>
+          ) : (
+            <span style={{ ...badgeInfo, background: "#eefaf3", borderColor: "#bfead3", color: "#0f5132" }}>
+              Stock ready
+            </span>
+          )}
+        </div>
+
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <input
+            style={{ ...inputBase, minWidth: 300 }}
+            placeholder="Search date / description / type / payment / bank / cheque…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button style={buttonMuted} onClick={() => setSearch("")}>
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div style={kpiRow}>
+        <div style={kpiCard}>
+          <div style={kpiLabel}>Total Qty (Filtered)</div>
+          <div style={kpiValue}>{kpis.totalQty.toLocaleString("en-US")}</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiLabel}>Total Debit (Filtered)</div>
+          <div style={kpiValue}>{kpis.totalDebit.toLocaleString("en-US")}</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiLabel}>Total Credit (Filtered)</div>
+          <div style={kpiValue}>{kpis.totalCredit.toLocaleString("en-US")}</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiLabel}>Closing Balance (Filtered)</div>
+          <div style={{ ...kpiValue, color: "#1f3b7a" }}>{kpis.bal.toLocaleString("en-US")}</div>
         </div>
       </div>
 
@@ -957,28 +1222,12 @@ const badgeY = (78 - badgeH) / 2;   // = 28
         <div style={manualCard}>
           <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 160px auto", gap: "10px" }}>
             <div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  fontWeight: "800",
-                  color: "#1f3b7a",
-                  marginBottom: 6,
-                }}
-              >
-                Date
-              </div>
+              <div style={{ fontSize: "11px", fontWeight: "900", color: "#1f3b7a", marginBottom: 6 }}>Date</div>
               <input style={inputBase} type="date" name="date" value={manualForm.date} onChange={handleManualChange} />
             </div>
 
             <div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  fontWeight: "800",
-                  color: "#1f3b7a",
-                  marginBottom: 6,
-                }}
-              >
+              <div style={{ fontSize: "11px", fontWeight: "900", color: "#1f3b7a", marginBottom: 6 }}>
                 Description (Old Sell)
               </div>
               <input
@@ -993,16 +1242,7 @@ const badgeY = (78 - badgeH) / 2;   // = 28
             </div>
 
             <div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  fontWeight: "800",
-                  color: "#1f3b7a",
-                  marginBottom: 6,
-                }}
-              >
-                Debit Amount
-              </div>
+              <div style={{ fontSize: "11px", fontWeight: "900", color: "#1f3b7a", marginBottom: 6 }}>Debit Amount</div>
               <input
                 style={inputBase}
                 type="number"
@@ -1021,11 +1261,7 @@ const badgeY = (78 - badgeH) / 2;   // = 28
                 style={buttonMuted}
                 onClick={() => {
                   setShowManualDebit(false);
-                  setManualForm({
-                    date: formatDateForInput(new Date()),
-                    description: "",
-                    debit: "",
-                  });
+                  setManualForm({ date: formatDateForInput(new Date()), description: "", debit: "" });
                 }}
               >
                 Cancel
@@ -1039,7 +1275,7 @@ const badgeY = (78 - badgeH) / 2;   // = 28
       {error && <p style={{ color: "#c0392b", margin: "10px 4px" }}>{error}</p>}
 
       <div style={tableWrap}>
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", maxHeight: "70vh", overflowY: "auto" }}>
           <table style={table}>
             <thead>
               <tr>
@@ -1061,149 +1297,42 @@ const badgeY = (78 - badgeH) / 2;   // = 28
             </thead>
 
             <tbody>
-              {entries.map((e) => {
+              {filteredEntries.map((e, idx) => {
                 const entryId = e._id || e.id;
-                const isEditing = editingId === entryId;
-
-                if (isEditing) {
-                  const availableForType =
-                    editForm.productType && availableByType[editForm.productType]
-                      ? availableByType[editForm.productType]
-                      : 0;
-
-                  const deltaQty = qtyNum - originalQty;
-                  const remainingAfter = availableForType - (deltaQty > 0 ? deltaQty : 0);
-
-                  return (
-                    <tr key={entryId} style={{ background: "#fbfdff" }}>
-                      <td style={thtd}>
-                        <input style={inputBase} type="date" name="date" value={editForm.date} onChange={handleEditChange} />
-                      </td>
-                      <td style={thtd}>
-                        <input style={inputBase} type="text" name="description" value={editForm.description} onChange={handleEditChange} />
-                      </td>
-                      <td style={thtd}>
-                        <select style={selectBase} name="productType" value={editForm.productType} onChange={handleEditChange}>
-                          <option value="">Select Type</option>
-                          {productTypes.map((t) => (
-                            <option key={t} value={t}>
-                              {t}
-                            </option>
-                          ))}
-                        </select>
-                        <div style={smallHint}>
-                          {stockLoading
-                            ? "Stock loading..."
-                            : editForm.productType
-                            ? `Available: ${availableByType[editForm.productType] || 0} | After edit: ${remainingAfter}`
-                            : ""}
-                        </div>
-                      </td>
-                      <td style={thtd}>
-                        <input style={inputBase} type="number" name="quantity" value={editForm.quantity} onChange={handleEditChange} />
-                      </td>
-                      <td style={thtd}>
-                        <input style={inputBase} type="number" name="rate" value={editForm.rate} onChange={handleEditChange} />
-                      </td>
-                      <td style={thtd}>
-                        <input style={inputBase} type="number" name="loading" value={editForm.loading} onChange={handleEditChange} />
-                      </td>
-                      <td style={thtd}>
-                        <input
-                          style={{ ...inputBase, background: "#f6f8ff", fontWeight: "700" }}
-                          type="text"
-                          name="debit"
-                          value={editDebit.toLocaleString("en-US")}
-                          readOnly
-                        />
-                      </td>
-                      <td style={thtd}>
-                        <input style={inputBase} type="number" name="credit" value={editForm.credit} onChange={handleEditChange} />
-                      </td>
-                      <td style={thtd}>
-                        <select style={selectBase} name="paymentType" value={editForm.paymentType} onChange={handleEditChange}>
-                          <option value="CASH">CASH</option>
-                          <option value="BANK">BANK-Transfer</option>
-                          <option value="CHEQUE">Check Payment</option>
-                          <option value="--">---</option>
-
-                        </select>
-                      </td>
-                      <td style={thtd}>
-                        <input
-                          style={{ ...inputBase, background: editForm.paymentType !== "BANK" ? "#f3f5f8" : "#fff" }}
-                          type="text"
-                          name="bankName"
-                          placeholder="Bank"
-                          value={editForm.bankName}
-                          onChange={handleEditChange}
-                          disabled={editForm.paymentType !== "BANK"}
-                        />
-                      </td>
-                      <td style={thtd}>
-                        <input
-                          style={{ ...inputBase, background: editForm.paymentType !== "--" ? "#f3f5f8" : "#fff" }}
-                          type="text"
-                          name=""
-                          placeholder=""
-                          value={editForm.bankName}
-                          onChange={handleEditChange}
-                          disabled={editForm.paymentType !== ""}
-                        />
-                      </td>
-                      <td style={thtd}>
-                        <input
-                          style={{ ...inputBase, background: editForm.paymentType !== "CHEQUE" ? "#f3f5f8" : "#fff" }}
-                          type="text"
-                          name="chequeNo"
-                          placeholder="Cheque No"
-                          value={editForm.chequeNo}
-                          onChange={handleEditChange}
-                          disabled={editForm.paymentType !== "CHEQUE"}
-                        />
-                      </td>
-                      <td style={thtd}>
-                        <input
-                          style={{ ...inputBase, background: editForm.paymentType !== "CHEQUE" ? "#f3f5f8" : "#fff" }}
-                          type="date"
-                          name="chequeDate"
-                          value={editForm.chequeDate}
-                          onChange={handleEditChange}
-                          disabled={editForm.paymentType !== "CHEQUE"}
-                        />
-                      </td>
-                      <td style={thtd}>{e.closingBalance?.toLocaleString("en-US")}</td>
-                      <td style={thtd}>
-                        <button style={button} onClick={saveEdit}>
-                          Save
-                        </button>
-                        <button style={{ ...buttonMuted, marginLeft: "6px" }} onClick={cancelEdit}>
-                          Cancel
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                }
+                const even = idx % 2 === 0;
 
                 return (
-                  <tr key={entryId}>
+                  <tr
+                    key={entryId}
+                    style={{ background: even ? "#ffffff" : "#fbfdff", transition: "all .15s ease" }}
+                    onMouseEnter={(ev) => (ev.currentTarget.style.background = "#f4f8ff")}
+                    onMouseLeave={(ev) => (ev.currentTarget.style.background = even ? "#ffffff" : "#fbfdff")}
+                  >
                     <td style={thtd}>{formatDateForDisplay(e.date)}</td>
-                    <td style={{ ...thtd, textAlign: "left", maxWidth: "260px" }}>{e.description}</td>
-                    <td style={thtd}>{e.productType || ""}</td>
+                    <td style={{ ...thtd, textAlign: "left", maxWidth: "360px", whiteSpace: "normal", lineHeight: 1.25 }}>
+                      {e.description}
+                    </td>
+                    <td style={{ ...thtd, fontWeight: 800, color: e.productType ? "#1f3b7a" : "#64748b" }}>
+                      {e.productType || ""}
+                    </td>
                     <td style={thtd}>{e.qty ?? e.quantity ?? ""}</td>
                     <td style={thtd}>{e.rate || ""}</td>
                     <td style={thtd}>{e.loading || ""}</td>
-                    <td style={thtd}>{e.debit ? Number(e.debit).toLocaleString("en-US") : ""}</td>
-                    <td style={thtd}>{e.credit ? Number(e.credit).toLocaleString("en-US") : ""}</td>
+                    <td style={{ ...thtd, fontWeight: 900, color: safeNum(e.debit) ? "#b02a37" : "#64748b" }}>
+                      {e.debit ? Number(e.debit).toLocaleString("en-US") : ""}
+                    </td>
+                    <td style={{ ...thtd, fontWeight: 900, color: safeNum(e.credit) ? "#0f5132" : "#64748b" }}>
+                      {e.credit ? Number(e.credit).toLocaleString("en-US") : ""}
+                    </td>
                     <td style={thtd}>{e.paymentType || "CASH"}</td>
                     <td style={thtd}>{e.bankName || ""}</td>
                     <td style={thtd}>{e.chequeNo || ""}</td>
                     <td style={thtd}>{formatDateForDisplay(e.chequeDate)}</td>
-                    <td style={{ ...thtd, fontWeight: "700", color: "#1f3b7a" }}>
+                    <td style={{ ...thtd, fontWeight: "900", color: "#1f3b7a" }}>
                       {typeof e.closingBalance === "number" ? Number(e.closingBalance).toLocaleString("en-US") : ""}
                     </td>
                     <td style={thtd}>
-                      <button style={button} onClick={() => startEdit(e)}>
+                      <button style={button} onClick={() => openEditPopup(e)}>
                         Edit
                       </button>
                       <button style={{ ...buttonDanger, marginLeft: "6px" }} onClick={() => handleDelete(entryId)}>
@@ -1214,7 +1343,7 @@ const badgeY = (78 - badgeH) / 2;   // = 28
                 );
               })}
 
-              {entries.length === 0 && !loading && (
+              {filteredEntries.length === 0 && !loading && (
                 <tr>
                   <td style={thtd} colSpan={14}>
                     No entries yet.
@@ -1226,7 +1355,6 @@ const badgeY = (78 - badgeH) / 2;   // = 28
         </div>
       </div>
 
-      {/* ✅ Floating PDF Buttons (FULL + LAST DATE) */}
       <div style={{ position: "fixed", right: "26px", bottom: "26px", zIndex: 9999, display: "flex", gap: "12px" }}>
         <button
           onClick={handleLastDatePdf}
@@ -1242,19 +1370,10 @@ const badgeY = (78 - badgeH) / 2;   // = 28
             justifyContent: "center",
             boxShadow: "0 10px 22px rgba(111, 66, 193, 0.35)",
             cursor: "pointer",
-            transition: "transform .15s ease, box-shadow .15s ease",
-            opacity: lastDateKey ? 1 : 0.6,
+            opacity: lastDateKeyMemo ? 1 : 0.6,
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 14px 26px rgba(111, 66, 193, 0.45)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0px)";
-            e.currentTarget.style.boxShadow = "0 10px 22px rgba(111, 66, 193, 0.35)";
-          }}
-          title={lastDateKey ? `Save LAST DATE PDF (${lastDateKey})` : "Last Date not available"}
-          disabled={!lastDateKey}
+          title={lastDateKeyMemo ? `Save LAST DATE PDF (${lastDateKeyMemo})` : "Last Date not available"}
+          disabled={!lastDateKeyMemo}
         >
           <i className="fa fa-calendar" style={{ fontSize: "22px" }} />
         </button>
@@ -1273,15 +1392,6 @@ const badgeY = (78 - badgeH) / 2;   // = 28
             justifyContent: "center",
             boxShadow: "0 10px 22px rgba(37, 211, 102, 0.35)",
             cursor: "pointer",
-            transition: "transform .15s ease, box-shadow .15s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 14px 26px rgba(37, 211, 102, 0.45)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0px)";
-            e.currentTarget.style.boxShadow = "0 10px 22px rgba(37, 211, 102, 0.35)";
           }}
           title="Save FULL ledger PDF"
         >

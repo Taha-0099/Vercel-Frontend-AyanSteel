@@ -70,7 +70,8 @@ const styles = {
     background: palette.card,
     borderRadius: "20px",
     padding: "32px",
-    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)",
+    boxShadow:
+      "0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)",
     border: `1px solid ${palette.borderLight}`,
   },
   headerBar: {
@@ -487,17 +488,17 @@ function getDaysSinceLastEntry(lastDate) {
 // Get row status based on closing balance and inactivity
 function getClientStatus(closingBalance, lastDate) {
   const balance = safeNum(closingBalance);
-  
+
   // Only apply color coding if there's a closing balance
   if (balance === 0) return "normal";
-  
+
   const daysSince = getDaysSinceLastEntry(lastDate);
-  
+
   if (daysSince === null) return "normal";
-  
+
   if (daysSince >= 15) return "danger";
   if (daysSince >= 10) return "warning";
-  
+
   return "normal";
 }
 
@@ -519,54 +520,95 @@ function Ledger() {
       const entries = res.data || [];
       setEntriesAll(entries);
 
-      const byClient = {};
-      let totalCredit = 0;
 
-      entries.forEach((e) => {
-        const name = e.accountName || "Unknown";
 
-        if (!byClient[name]) {
-          byClient[name] = {
-            accountName: name,
-            lastDate: null,
-            closingBalance: 0,
-            _balance: 0,
-          };
-        }
 
-        const client = byClient[name];
 
-        const d = e.date ? new Date(e.date) : null;
-        if (
-          d &&
-          !Number.isNaN(d.getTime()) &&
-          (!client.lastDate || d > client.lastDate)
-        ) {
-          client.lastDate = d;
-        }
 
-        const debit = safeNum(e.debit);
-        const credit = safeNum(e.credit);
 
-        totalCredit += credit;
 
-        client._balance += credit - debit;
-        client.closingBalance = client._balance;
-      });
 
-      const clientArray = Object.values(byClient).sort((a, b) =>
-        a.accountName.localeCompare(b.accountName)
-      );
 
-      const totalDebitFromClosing = clientArray.reduce((sum, c) => {
-        const bal = safeNum(c.closingBalance);
-        return sum + Math.abs(bal);
-      }, 0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
+     const byClient = {};
+let totalCredit = 0;
+
+entries.forEach((e) => {
+  const name = e.accountName || "Unknown";
+
+  if (!byClient[name]) {
+    byClient[name] = {
+      accountName: name,
+      lastDate: null,
+      closingBalance: 0,
+      _balance: 0,
+      hasSale: false, // ✅ NEW
+    };
+  }
+
+  const client = byClient[name];
+
+  // ✅ mark as real client if it has at least one SALE entry
+  if (isSaleEntry(e)) client.hasSale = true;
+
+  const d = e.date ? new Date(e.date) : null;
+  if (d && !Number.isNaN(d.getTime()) && (!client.lastDate || d > client.lastDate)) {
+    client.lastDate = d;
+  }
+
+  const debit = safeNum(e.debit);
+  const credit = safeNum(e.credit);
+
+  totalCredit += credit;
+
+  client._balance += credit - debit;
+  client.closingBalance = client._balance;
+});
+
+const clientArray = Object.values(byClient).sort((a, b) =>
+  a.accountName.localeCompare(b.accountName)
+);
+
+// ✅ FIX: Receivable = ONLY negative closing balances of REAL CLIENTS (sale accounts)
+const totalReceivable = clientArray.reduce((sum, c) => {
+  const bal = safeNum(c.closingBalance);
+  if (!c.hasSale) return sum;       // ✅ ignore non-client accounts
+  return bal < 0 ? sum + Math.abs(bal) : sum;
+}, 0);
+
+setSummary({
+  totalClients: clientArray.length,
+  totalEntries: entries.length,
+  totalDebit: totalReceivable, // keep same key to avoid UI change
+  totalCredit,
+});
+
+setClients(clientArray);
+
 
       setSummary({
         totalClients: clientArray.length,
         totalEntries: entries.length,
-        totalDebit: totalDebitFromClosing,
+        totalDebit: totalReceivable, // keep key name to avoid UI changes
         totalCredit,
       });
 
@@ -752,8 +794,8 @@ function Ledger() {
       maintainAspectRatio: true,
       plugins: {
         legend: { display: true, position: "top" },
-        tooltip: { 
-          mode: "index", 
+        tooltip: {
+          mode: "index",
           intersect: false,
           backgroundColor: palette.text,
           padding: 12,
@@ -871,7 +913,9 @@ function Ledger() {
                 <div style={styles.kpiValue}>
                   ₨ {safeNum(summary.totalDebit).toLocaleString()}
                 </div>
-                <div style={styles.kpiSub}>Sum of absolute closing balances</div>
+                <div style={styles.kpiSub}>
+                  Sum of negative closing balances only
+                </div>
               </div>
 
               <div style={styles.card}>
@@ -928,9 +972,7 @@ function Ledger() {
             <div style={styles.grid2}>
               <div style={styles.chartBox}>
                 <div style={styles.chartTitle}>Daily Sales Trend</div>
-                <div style={styles.chartSub}>
-                  Last 14 days (based on SALES)
-                </div>
+                <div style={styles.chartSub}>Last 14 days (based on SALES)</div>
                 <Line data={dailyLineData} options={lineOptions} />
               </div>
 
@@ -1008,11 +1050,11 @@ function Ledger() {
                 {filteredClients.map((c, idx) => {
                   const status = getClientStatus(c.closingBalance, c.lastDate);
                   const daysSince = getDaysSinceLastEntry(c.lastDate);
-                  
+
                   let rowStyle = {
                     background: idx % 2 ? "#fcfdff" : "#fff",
                   };
-                  
+
                   if (status === "warning") {
                     rowStyle = { ...rowStyle, ...styles.warningRow };
                   } else if (status === "danger") {
@@ -1073,9 +1115,7 @@ function Ledger() {
                           style={{
                             fontWeight: "700",
                             color:
-                              c.closingBalance > 0
-                                ? palette.text
-                                : palette.muted,
+                              c.closingBalance > 0 ? palette.text : palette.muted,
                           }}
                         >
                           ₨{" "}

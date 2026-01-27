@@ -1112,6 +1112,9 @@ function StockDashboard() {
     }
   };
 
+
+
+
   const startEdit = (entry) => {
     setEditingId(entry._id);
     setEditForm({
