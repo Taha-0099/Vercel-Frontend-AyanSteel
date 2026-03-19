@@ -1,0 +1,236 @@
+/* src/GaugePage.css */
+.gpage {
+  max-width: 1150px;
+  margin: 22px auto 60px;
+  padding: 0 16px;
+  color: #0c1220;
+}
+
+.gpageTop {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0b1220 0%, #111b2d 50%, #0b1220 100%);
+  color: #fff;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.gpageTitle h1 {
+  margin: 8px 0 4px;
+  font-size: 26px;
+  letter-spacing: 0.3px;
+}
+
+.gpageTitle p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.gpageBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  font-size: 12px;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.gpageActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.ggrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .ggrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gcard {
+  background: #fff;
+  border: 1px solid #e8edf6;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(12, 18, 32, 0.06);
+}
+
+.gcard.result {
+  background: radial-gradient(900px 400px at 10% 0%, #eef6ff 0%, transparent 55%),
+              #ffffff;
+}
+
+.gcardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 1px dashed #e7ecf6;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.gcardHead h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.ghint {
+  font-size: 12px;
+  color: #5a6a85;
+}
+
+.glabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2a3550;
+  margin: 6px 0 8px;
+}
+
+.ginputRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.ginput {
+  flex: 1;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #dfe6f2;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.ginput:focus {
+  border-color: #3aa6ff;
+  box-shadow: 0 0 0 4px rgba(58, 166, 255, 0.14);
+}
+
+.gbtn {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid #0b1220;
+  background: #0b1220;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gbtn:hover {
+  transform: translateY(-1px);
+}
+
+.gbtn.ghost {
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+.gchecks {
+  margin-top: 12px;
+}
+
+.gcheck {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+  color: #22304a;
+}
+
+.gcheck input {
+  width: 16px;
+  height: 16px;
+}
+
+.gerror {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #9f1239;
+  font-size: 13px;
+}
+
+.gmini {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gchip {
+  user-select: none;
+  cursor: pointer;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid #e5ecf7;
+  background: #f7faff;
+  font-size: 12px;
+  font-weight: 800;
+  color: #1b2b4b;
+}
+
+.gchip:hover {
+  background: #eef6ff;
+  border-color: #cfe6ff;
+}
+
+.gresultBox {
+  margin-top: 10px;
+  border-radius: 18px;
+  border: 1px solid #dfe9f7;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  padding: 18px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7);
+}
+
+.gresultMain {
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  color: #0b1220;
+}
+
+.gresultSub {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #546686;
+}
+
+.gnote {
+  margin-top: 14px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  background: #f1f7ff;
+  border: 1px solid #d7e9ff;
+  color: #1c3d6b;
+  font-size: 13px;
+  line-height: 1.55;
+}

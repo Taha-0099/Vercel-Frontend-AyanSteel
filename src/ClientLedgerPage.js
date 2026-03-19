@@ -1,7 +1,11 @@
 // src/ClientLedgerPage.js
 // ✅ UX IMPROVED (structure + spacing + sticky header + zebra rows + hover + badges)
 // ✅ EDIT opens SweetAlert2 popup and SAVES ONCE (fix double-save issue)
-// ✅ PDF untouched
+// ✅ PDF UPDATED (fresh look):
+//    - more spacing below top bar
+//    - remove extra/center FULL LEDGER badge (keep only right)
+//    - replace "AS" with a clean logo (drawn in PDF, no image) ✅ UPDATED: remove coils/sheets icon → use "AS" monogram
+//    - change bottom accent line color
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -187,6 +191,61 @@ const headerCell = {
 };
 
 /* ----------------------------- */
+/* ✅ INLINE SVG ICONS (NO FA DEP) */
+/* ----------------------------- */
+
+const Svg = ({ size = 18, stroke = 2, children, style = {} }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={stroke}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ display: "block", ...style }}
+    aria-hidden="true"
+  >
+    {children}
+  </svg>
+);
+
+const IconBack = ({ size = 16 }) => (
+  <Svg size={size}>
+    <path d="M15 18l-6-6 6-6" />
+    <path d="M9 12h12" />
+  </Svg>
+);
+
+const IconPdfDownload = ({ size = 18 }) => (
+  <Svg size={size}>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <path d="M14 2v6h6" />
+    <path d="M12 11v7" />
+    <path d="M9.5 15.5L12 18l2.5-2.5" />
+  </Svg>
+);
+
+const IconCalendar = ({ size = 18 }) => (
+  <Svg size={size}>
+    <path d="M8 2v2" />
+    <path d="M16 2v2" />
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M3 10h18" />
+    <path d="M7 14h3" />
+    <path d="M12 14h3" />
+  </Svg>
+);
+
+const IconPlus = ({ size = 16 }) => (
+  <Svg size={size}>
+    <path d="M12 5v14" />
+    <path d="M5 12h14" />
+  </Svg>
+);
+
+/* ----------------------------- */
 /* ✅ LOGIC HELPERS */
 /* ----------------------------- */
 
@@ -231,13 +290,13 @@ function safeNum(v) {
   return Number.isFinite(n) ? n : 0;
 }
 
-/* ✅ NEW: robust number parsing (handles "3,318") */
+/* ✅ robust number parsing (handles "3,318") */
 function n(v) {
   const x = Number(String(v ?? "").replace(/,/g, ""));
   return Number.isFinite(x) ? x : 0;
 }
 
-/* ✅ NEW: pick first valid numeric field */
+/* ✅ pick first valid numeric field */
 function pickNum(obj, keys) {
   for (const k of keys) {
     const v = obj?.[k];
@@ -301,58 +360,40 @@ function ClientLedgerPage() {
     }
   };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   /* ✅ FIXED: Available qty SAME as NewLedgerEntryPage (sum all stock.quantity incl negatives) */
-const loadStock = async () => {
-  try {
-    setStockLoading(true);
-    const res = await api.get("/api/stock");
-    const list = res.data || [];
+  const loadStock = async () => {
+    try {
+      setStockLoading(true);
+      const res = await api.get("/api/stock");
+      const list = res.data || [];
 
-    const typesSet = new Set();
-    const availableMap = {};
+      const typesSet = new Set();
+      const availableMap = {};
 
-    list.forEach((s) => {
-      const type = (s.productType || "").trim();
-      if (!type) return;
+      list.forEach((s) => {
+        const type = (s.productType || "").trim();
+        if (!type) return;
 
-      typesSet.add(type);
+        typesSet.add(type);
 
-      // IMPORTANT: stock.quantity can be + (purchase/return) OR - (sale)
-      const q = n(s.quantity); // uses your comma-safe parser
-      availableMap[type] = (availableMap[type] || 0) + q;
-    });
+        // IMPORTANT: stock.quantity can be + (purchase/return) OR - (sale)
+        const q = n(s.quantity);
+        availableMap[type] = (availableMap[type] || 0) + q;
+      });
 
-    // Never show negative available in UI
-    Object.keys(availableMap).forEach((t) => {
-      availableMap[t] = clamp0(availableMap[t]);
-    });
+      // Never show negative available in UI
+      Object.keys(availableMap).forEach((t) => {
+        availableMap[t] = clamp0(availableMap[t]);
+      });
 
-    setProductTypes(Array.from(typesSet).sort());
-    setAvailableByType(availableMap);
-  } catch (err) {
-    console.error("Error loading stock", err);
-  } finally {
-    setStockLoading(false);
-  }
-};
+      setProductTypes(Array.from(typesSet).sort());
+      setAvailableByType(availableMap);
+    } catch (err) {
+      console.error("Error loading stock", err);
+    } finally {
+      setStockLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadEntries();
@@ -817,7 +858,7 @@ const loadStock = async () => {
   };
 
   /* ----------------------------- */
-  /* ✅ PDF HELPERS (UNCHANGED) */
+  /* ✅ PDF HELPERS (updated design) */
   /* ----------------------------- */
 
   const lastDateKeyMemo = useMemo(() => {
@@ -850,6 +891,58 @@ const loadStock = async () => {
     return scaled;
   };
 
+  // ✅ Professional "AS" Logo (no circle, no underline/overline)
+  const drawAyanLogo = (doc, x, y) => {
+    const w = 62;
+    const h = 40;
+    const r = 10;
+
+    // subtle shadow (no transparency needed)
+    doc.setFillColor(8, 18, 34);
+    doc.roundedRect(x + 2, y + 2, w, h, r, r, "F");
+
+    // outer plate
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(210, 221, 238);
+    doc.setLineWidth(1);
+    doc.roundedRect(x, y, w, h, r, r, "FD");
+
+    // inner face (navy)
+    doc.setFillColor(12, 32, 62);
+    doc.setDrawColor(12, 46, 92);
+    doc.roundedRect(x + 3, y + 3, w - 6, h - 6, r - 3, r - 3, "FD");
+
+    // cyan corner accents (professional industrial look)
+    doc.setFillColor(0, 196, 204);
+    doc.setDrawColor(0, 196, 204);
+    doc.triangle(x + w - 18, y + 3, x + w - 3, y + 3, x + w - 3, y + 18, "F");
+    doc.triangle(x + 3, y + h - 18, x + 18, y + h - 3, x + 3, y + h - 3, "F");
+
+    // Stylish AS typography (bold italic + two-tone)
+    // tiny shadow
+    doc.setFont("helvetica", "bolditalic");
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(24);
+    doc.text("A", x + 18.8, y + 28.4);
+    doc.setFontSize(22);
+    doc.text("S", x + 34.8, y + 28.4);
+
+    // A (white)
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.text("A", x + 18, y + 27.6);
+
+    // S (cyan with white highlight)
+    doc.setTextColor(0, 196, 204);
+    doc.setFontSize(22);
+    doc.text("S", x + 34, y + 27.6);
+    doc.setTextColor(255, 255, 255);
+    doc.text("S", x + 33.2, y + 27.6);
+
+    // reset
+    doc.setLineWidth(1);
+  };
+
   const makeLedgerPdf = ({
     rows,
     reportTitle = "CLIENT LEDGER STATEMENT",
@@ -869,60 +962,69 @@ const loadStock = async () => {
     const availableW = pageWidth - margins.left - margins.right;
     const W = getFittingColumnWidths(availableW);
 
+    // background
     doc.setFillColor(247, 250, 255);
     doc.rect(0, 0, pageWidth, pageHeight, "F");
 
-    doc.setFillColor(31, 59, 122);
-    doc.rect(0, 0, pageWidth, 78, "F");
+    // ✅ TOP BAR
+    const barH = 90;
+    doc.setFillColor(12, 32, 62);
+    doc.rect(0, 0, pageWidth, barH, "F");
 
-    doc.setFillColor(85, 132, 255);
-    doc.rect(0, 78, pageWidth, 3, "F");
+    // accent line
+    doc.setFillColor(0, 196, 204);
+    doc.rect(0, barH, pageWidth, 4, "F");
 
+    // ✅ AS monogram logo
+    drawAyanLogo(doc, 22, 22);
+
+    // brand text
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(28);
     doc.setFont("helvetica", "bold");
-    doc.text("AYAN STEEL", 30, 38);
-
+    doc.text("AYAN STEEL", 98, 42);
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text("We Deal in All Kind Of CRC, EG, GP HRC Color Coils Steel Sheets", 30, 56);
+    doc.text("We Deal in All Kind Of CRC, EG, GP, HRC and Color Coils", 98, 60);
 
     doc.setFontSize(9.2);
     doc.text(
       "Arslan Iftikhar: 03229848888 | Atif Iftikhar: 03214097588 | Salman Iftikhar: 03244905087 | Numan Iftikhar: 03224100022",
-      30,
-      68
+      98,
+      74
     );
 
+    // ✅ right badge
     const badgeText = reportTag || "FULL LEDGER";
     const badgeW = Math.min(240, 9.2 * badgeText.length + 34);
     const badgeH = 22;
     const badgeX = pageWidth - 30 - badgeW;
-    const badgeY = (78 - badgeH) / 2;
+    const badgeY = (barH - badgeH) / 2 + 2;
 
     doc.setDrawColor(255, 255, 255);
     doc.setLineWidth(1);
     doc.setFillColor(255, 255, 255);
     doc.roundedRect(badgeX, badgeY, badgeW, badgeH, 10, 10, "FD");
 
-    doc.setTextColor(31, 59, 122);
+    doc.setTextColor(12, 46, 92);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.text(badgeText, badgeX + badgeW / 2, badgeY + 15, { align: "center" });
 
-    doc.setTextColor(31, 59, 122);
+    // title spacing
+    doc.setTextColor(12, 46, 92);
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text(reportTitle, pageWidth / 2, 112, { align: "center" });
+    doc.text(reportTitle, pageWidth / 2, barH + 52, { align: "center" });
 
     const pillText = `Account: ${decodedName}`;
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(31, 59, 122);
+    doc.setTextColor(12, 46, 92);
     doc.setFillColor(235, 242, 255);
     doc.setDrawColor(210, 224, 255);
-    doc.roundedRect(pageWidth / 2 - 210, 122, 420, 30, 10, 10, "FD");
-    doc.text(pillText, pageWidth / 2, 142, { align: "center" });
+    doc.roundedRect(pageWidth / 2 - 210, barH + 62, 420, 30, 10, 10, "FD");
+    doc.text(pillText, pageWidth / 2, barH + 82, { align: "center" });
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
@@ -932,7 +1034,7 @@ const loadStock = async () => {
     let rangeLine = `Generated on: ${currentDate}`;
     const uniqueKeys = Array.from(new Set(rows.map((r) => dateKey(r.date)).filter(Boolean)));
     if (uniqueKeys.length === 1) rangeLine += `  |  Date: ${uniqueKeys[0]}`;
-    doc.text(rangeLine, pageWidth / 2, 165, { align: "center" });
+    doc.text(rangeLine, pageWidth / 2, barH + 104, { align: "center" });
 
     const body = rows.map((e) => [
       formatDateForDisplay(e.date),
@@ -951,7 +1053,7 @@ const loadStock = async () => {
     ]);
 
     autoTable(doc, {
-      startY: 180,
+      startY: barH + 122,
       tableWidth: availableW,
       margin: { left: margins.left, right: margins.right, bottom: margins.bottom, top: margins.top },
       head: [["Date", "Description", "Type", "Qty", "Rate", "Loading", "Debit", "Credit", "Pay", "Bank", "Chq#", "Chq Dt", "Balance"]],
@@ -969,7 +1071,7 @@ const loadStock = async () => {
         valign: "middle",
       },
       headStyles: {
-        fillColor: [31, 59, 122],
+        fillColor: [12, 46, 92],
         textColor: [255, 255, 255],
         fontStyle: "bold",
         fontSize: 7.2,
@@ -1019,7 +1121,7 @@ const loadStock = async () => {
         ? safeNum(lastRow.closingBalance)
         : totalCredit - totalDebit;
 
-    const lastY = doc.lastAutoTable?.finalY ?? 180;
+    const lastY = doc.lastAutoTable?.finalY ?? (barH + 122);
 
     const boxW = 260;
     const boxH = 110;
@@ -1036,7 +1138,7 @@ const loadStock = async () => {
     doc.setFillColor(235, 242, 255);
     doc.roundedRect(boxX, boxY, boxW, boxH, 10, 10, "FD");
 
-    doc.setFillColor(31, 59, 122);
+    doc.setFillColor(12, 46, 92);
     doc.roundedRect(boxX, boxY, boxW, 28, 10, 10, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
@@ -1060,7 +1162,7 @@ const loadStock = async () => {
     doc.text(totalCredit.toLocaleString("en-US"), valueX, boxY + 88, { align: "right" });
 
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(31, 59, 122);
+    doc.setTextColor(12, 46, 92);
     doc.text("Closing Balance:", labelX, boxY + 108);
     doc.text(Number(lastClosing || 0).toLocaleString("en-US"), valueX, boxY + 108, { align: "right" });
 
@@ -1122,12 +1224,13 @@ const loadStock = async () => {
       <div style={headerRow}>
         <div>
           <button
-            style={button}
+            style={{ ...button, display: "inline-flex", alignItems: "center", gap: "8px" }}
             onClick={() => navigate(-1)}
             onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
             onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0px)")}
           >
-            ⬅ Back
+            <IconBack size={16} />
+            Back
           </button>
         </div>
 
@@ -1151,21 +1254,46 @@ const loadStock = async () => {
           </div>
         </div>
 
+        {/* ✅ ICON BUTTONS (FULL + LAST DATE PDF) */}
         <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", flexWrap: "wrap" }}>
-          <button style={buttonSecondary} onClick={handleLastDatePdf} disabled={!lastDateKeyMemo}>
-            ⬇ Last Date PDF
+          <button
+            style={{ ...buttonSecondary, display: "inline-flex", alignItems: "center", gap: "8px" }}
+            onClick={handleWhatsAppPdf}
+          >
+            <IconPdfDownload size={16} />
+            Full Ledger PDF
           </button>
 
           <button
-            style={buttonSecondary}
+            style={{
+              ...buttonSecondary,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              opacity: lastDateKeyMemo ? 1 : 0.6,
+            }}
+            onClick={handleLastDatePdf}
+            disabled={!lastDateKeyMemo}
+          >
+            <IconCalendar size={16} />
+            Last Date PDF
+          </button>
+
+          <button
+            style={{ ...buttonSecondary, display: "inline-flex", alignItems: "center", gap: "8px" }}
             onClick={() => setShowManualDebit((p) => !p)}
             title="Add old sell debit without stock"
           >
-            + Old Sell Debit
+            <IconPlus size={16} />
+            Old Sell Debit
           </button>
 
-          <button style={button} onClick={() => navigate(`/clients/${encodeURIComponent(decodedName)}/new-entry`)}>
-            + New Record
+          <button
+            style={{ ...button, display: "inline-flex", alignItems: "center", gap: "8px" }}
+            onClick={() => navigate(`/clients/${encodeURIComponent(decodedName)}/new-entry`)}
+          >
+            <IconPlus size={16} />
+            New Record
           </button>
         </div>
       </div>
@@ -1355,6 +1483,7 @@ const loadStock = async () => {
         </div>
       </div>
 
+      {/* ✅ FLOATING ICON BUTTONS (NO GREEN/PURPLE BALLS WITHOUT ICONS) */}
       <div style={{ position: "fixed", right: "26px", bottom: "26px", zIndex: 9999, display: "flex", gap: "12px" }}>
         <button
           onClick={handleLastDatePdf}
@@ -1375,7 +1504,7 @@ const loadStock = async () => {
           title={lastDateKeyMemo ? `Save LAST DATE PDF (${lastDateKeyMemo})` : "Last Date not available"}
           disabled={!lastDateKeyMemo}
         >
-          <i className="fa fa-calendar" style={{ fontSize: "22px" }} />
+          <IconCalendar size={24} />
         </button>
 
         <button
@@ -1395,7 +1524,7 @@ const loadStock = async () => {
           }}
           title="Save FULL ledger PDF"
         >
-          <i className="fa fa-whatsapp" style={{ fontSize: "28px" }} />
+          <IconPdfDownload size={28} />
         </button>
       </div>
     </div>

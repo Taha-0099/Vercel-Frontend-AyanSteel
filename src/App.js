@@ -1,11 +1,6 @@
 // src/App.js
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Ledger from "./Ledger";
 import SalesPage from "./SalesPage";
@@ -19,6 +14,9 @@ import AvailableStockPage from "./AvailableStockPage";
 import SalesLedgerDashboard from "./SalesLedgerDashboard";
 import SupplierLedgerDashboard from "./SupplierLedgerDashboard";
 import SupplierLedgerPage from "./SupplierLedgerPage";
+
+// ✅ NEW
+import GaugePage from "./GaugePage";
 
 function App() {
   return (
@@ -34,48 +32,30 @@ function App() {
         <Route path="/sales" element={<SalesPage />} />
 
         {/* Client ledger */}
-        <Route
-          path="/clients/:accountName"
-          element={<ClientLedgerPage />}
-        />
+        <Route path="/clients/:accountName" element={<ClientLedgerPage />} />
 
         {/* New entry for client */}
-        <Route
-          path="/clients/:accountName/new-entry"
-          element={<NewLedgerEntryPage />}
-        />
+        <Route path="/clients/:accountName/new-entry" element={<NewLedgerEntryPage />} />
 
         {/* Supplier ledger */}
-        <Route
-          path="/suppliers/:personName"
-          element={<SupplierLedgerPage />}
-        />
+        <Route path="/suppliers/:personName" element={<SupplierLedgerPage />} />
 
         {/* Sales & Purchase dashboards */}
-        <Route
-          path="/ledger/sales"
-          element={<SalesLedgerDashboard />}
-        />
-        <Route
-          path="/ledger/purchases"
-          element={<SupplierLedgerDashboard />}
-        />
+        <Route path="/ledger/sales" element={<SalesLedgerDashboard />} />
+        <Route path="/ledger/purchases" element={<SupplierLedgerDashboard />} />
 
         {/* Stock */}
         <Route path="/stock" element={<StockDashboard />} />
-        <Route
-          path="/available-stock"
-          element={<AvailableStockPage />}
-        />
+        <Route path="/available-stock" element={<AvailableStockPage />} />
 
         {/* Company balance */}
-        <Route
-          path="/company-balance"
-          element={<CompanyBalancePage />}
-        />
+        <Route path="/company-balance" element={<CompanyBalancePage />} />
 
         {/* Admin panel */}
         <Route path="/admin" element={<AdminPanel />} />
+
+        {/* ✅ NEW: Gauge calculator */}
+        <Route path="/gauge" element={<GaugePage />} />
 
         {/* Fallback → Ledger */}
         <Route path="*" element={<Navigate to="/" replace />} />

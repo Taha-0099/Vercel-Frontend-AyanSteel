@@ -4,498 +4,19 @@ import api from "./api";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-// ✅ PDF Export
+// PDF Export
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-/* -------------------------- */
-/* ✅ CRAZY UI + PRO FEATURES  */
-/* (Safe + No backend changes) */
-/* -------------------------- */
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    padding: "22px 14px 70px",
-    background:
-      "radial-gradient(1200px 600px at 10% 10%, #eef3ff 0%, transparent 50%)," +
-      "radial-gradient(1200px 600px at 90% 20%, #f1f7ff 0%, transparent 50%)," +
-      "linear-gradient(180deg, #f8faff 0%, #f5f7fb 100%)",
-  },
-
-  container: {
-    maxWidth: "1480px",
-    margin: "0 auto",
-    padding: "18px",
-    background: "rgba(255,255,255,0.65)",
-    backdropFilter: "blur(8px)",
-    borderRadius: "16px",
-    border: "1px solid #e6ebf5",
-    boxShadow: "0 12px 34px rgba(16, 24, 40, 0.08)",
-  },
-
-  headerBar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "12px",
-    marginBottom: "14px",
-    padding: "14px 14px",
-    background: "#ffffff",
-    borderRadius: "14px",
-    border: "1px solid #e8edf7",
-    boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-    flexWrap: "wrap",
-    position: "sticky",
-    top: 12,
-    zIndex: 20,
-  },
-
-  titleWrap: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    minWidth: 280,
-  },
-
-  titleBadge: {
-    width: "40px",
-    height: "40px",
-    borderRadius: "12px",
-    background: "linear-gradient(135deg, #2f5597, #1f3b7a)",
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "900",
-    fontSize: "18px",
-    boxShadow: "0 10px 18px rgba(47, 85, 151, 0.24)",
-    flex: "0 0 auto",
-  },
-
-  titleStyle: {
-    fontSize: "22px",
-    fontWeight: "900",
-    color: "#0f1f3d",
-    letterSpacing: "0.2px",
-    lineHeight: 1.1,
-  },
-
-  subTitle: {
-    fontSize: "11px",
-    fontWeight: "700",
-    color: "#5a6b88",
-    marginTop: "3px",
-  },
-
-  headerActions: {
-    display: "flex",
-    gap: "8px",
-    flexWrap: "wrap",
-    justifyContent: "flex-end",
-  },
-
-  btn: {
-    padding: "9px 14px",
-    borderRadius: "11px",
-    border: "1px solid rgba(255,255,255,0.25)",
-    cursor: "pointer",
-    background:
-      "linear-gradient(135deg, #2f5597 0%, #1f3b7a 55%, #2f5597 100%)",
-    color: "#fff",
-    fontWeight: "900",
-    fontSize: "11.5px",
-    letterSpacing: "0.2px",
-    transition: "all .2s ease",
-    boxShadow: "0 8px 18px rgba(47, 85, 151, 0.22)",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    whiteSpace: "nowrap",
-  },
-
-  btnGhost: {
-    padding: "9px 12px",
-    borderRadius: "11px",
-    border: "1px solid #e3e9f5",
-    background: "#fff",
-    cursor: "pointer",
-    fontWeight: "800",
-    fontSize: "11.5px",
-    color: "#1f3b7a",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    whiteSpace: "nowrap",
-  },
-
-  btnDanger: {
-    padding: "9px 12px",
-    borderRadius: "11px",
-    border: "1px solid rgba(255,255,255,0.25)",
-    cursor: "pointer",
-    background: "linear-gradient(135deg, #dc3545, #b02a37)",
-    color: "#fff",
-    fontWeight: "900",
-    fontSize: "11.5px",
-    boxShadow: "0 8px 18px rgba(220, 53, 69, 0.22)",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    whiteSpace: "nowrap",
-  },
-
-  btnMini: {
-    padding: "6px 10px",
-    borderRadius: "10px",
-    border: "1px solid #e3e9f5",
-    cursor: "pointer",
-    background: "#fff",
-    color: "#1f3b7a",
-    fontWeight: "900",
-    fontSize: "10.5px",
-  },
-
-  btnDangerMini: {
-    padding: "6px 10px",
-    borderRadius: "10px",
-    border: "none",
-    cursor: "pointer",
-    background: "linear-gradient(135deg, #dc3545, #b02a37)",
-    color: "#fff",
-    fontWeight: "900",
-    fontSize: "10.5px",
-  },
-
-  topToolsRow: {
-    display: "grid",
-    gridTemplateColumns: "1.2fr 0.8fr",
-    gap: "12px",
-    marginBottom: "14px",
-  },
-
-  toolCard: {
-    background: "#fff",
-    border: "1px solid #e8edf7",
-    borderRadius: "14px",
-    padding: "14px",
-    boxShadow: "0 8px 22px rgba(16, 24, 40, 0.06)",
-  },
-
-  toolTitle: {
-    margin: 0,
-    fontSize: 12,
-    fontWeight: 900,
-    color: "#0f1f3d",
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-  },
-
-  toolHint: {
-    marginTop: 4,
-    fontSize: 10.5,
-    color: "#6b7a94",
-    fontWeight: 700,
-  },
-
-  inputRow: {
-    display: "grid",
-    gridTemplateColumns: "1fr 160px 160px",
-    gap: "10px",
-    marginTop: "12px",
-  },
-
-  input: {
-    padding: "9px 10px",
-    borderRadius: "10px",
-    border: "1px solid #d9e2f2",
-    width: "100%",
-    fontSize: "11.5px",
-    background: "#fff",
-    boxSizing: "border-box",
-    outline: "none",
-  },
-
-  select: {
-    padding: "9px 10px",
-    borderRadius: "10px",
-    border: "1px solid #d9e2f2",
-    width: "100%",
-    fontSize: "11.5px",
-    background: "#fff",
-    boxSizing: "border-box",
-    outline: "none",
-  },
-
-  cardsRow: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "12px",
-    marginBottom: "14px",
-  },
-
-  card: {
-    background: "#ffffff",
-    padding: "16px 16px 14px",
-    borderRadius: "14px",
-    border: "1px solid #e8edf7",
-    boxShadow: "0 8px 20px rgba(16, 24, 40, 0.06)",
-    position: "relative",
-    overflow: "hidden",
-  },
-
-  cardAccent: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "3px",
-    background: "linear-gradient(90deg, #2f5597, #6aa5ff, #2f5597)",
-    opacity: 0.9,
-  },
-
-  cardLabel: {
-    fontSize: "10.5px",
-    color: "#6b7a94",
-    fontWeight: "900",
-    letterSpacing: "0.6px",
-  },
-
-  cardValue: {
-    fontSize: "22px",
-    fontWeight: "900",
-    color: "#0f1f3d",
-    marginTop: "6px",
-  },
-
-  cardSubValue: {
-    fontSize: "12px",
-    color: "#6b7a94",
-    marginTop: "2px",
-    fontWeight: "700",
-  },
-
-  section: {
-    background: "#ffffff",
-    borderRadius: "14px",
-    border: "1px solid #e8edf7",
-    padding: "16px",
-    marginBottom: "14px",
-    boxShadow: "0 8px 22px rgba(16, 24, 40, 0.05)",
-  },
-
-  sectionHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    gap: "10px",
-    flexWrap: "wrap",
-    marginBottom: "12px",
-  },
-
-  sectionTitle: {
-    margin: 0,
-    fontSize: "16px",
-    fontWeight: "900",
-    color: "#0f1f3d",
-  },
-
-  sectionHint: {
-    fontSize: "10.5px",
-    color: "#6b7a94",
-    fontWeight: "700",
-  },
-
-  formGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "12px",
-  },
-
-  label: {
-    display: "block",
-    fontSize: "10.5px",
-    fontWeight: "900",
-    color: "#27324a",
-    marginBottom: "6px",
-    letterSpacing: "0.2px",
-  },
-
-  textarea: {
-    padding: "9px 10px",
-    borderRadius: "10px",
-    border: "1px solid #d9e2f2",
-    width: "100%",
-    fontSize: "11.5px",
-    background: "#fff",
-    boxSizing: "border-box",
-    outline: "none",
-    minHeight: "76px",
-  },
-
-  costBox: {
-    marginTop: "12px",
-    padding: "14px",
-    background:
-      "linear-gradient(135deg, #f7faff 0%, #ffffff 40%, #f7faff 100%)",
-    borderRadius: "12px",
-    border: "1px solid #eef2f8",
-  },
-
-  costGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "10px",
-    fontSize: "11.5px",
-  },
-
-  costItem: {
-    padding: "10px",
-    background: "#ffffff",
-    borderRadius: "10px",
-    border: "1px solid #eef2f8",
-  },
-
-  badge: {
-    padding: "5px 10px",
-    borderRadius: "999px",
-    fontSize: "9.5px",
-    fontWeight: "900",
-    letterSpacing: "0.3px",
-    border: "1px solid rgba(0,0,0,0.05)",
-    display: "inline-block",
-  },
-
-  tableWrap: {
-    overflowX: "auto",
-    borderRadius: "12px",
-    border: "1px solid #eef2f8",
-  },
-
-  table: {
-    width: "100%",
-    borderCollapse: "separate",
-    borderSpacing: 0,
-    background: "#fff",
-    minWidth: "1100px",
-  },
-
-  th: {
-    padding: "11px 10px",
-    fontSize: "11px",
-    background: "linear-gradient(180deg, #f4f8ff 0%, #eef4ff 100%)",
-    fontWeight: "900",
-    textAlign: "left",
-    whiteSpace: "nowrap",
-    color: "#1f3b7a",
-    borderBottom: "1px solid #e6ebf5",
-    position: "sticky",
-    top: 0,
-    zIndex: 1,
-  },
-
-  td: {
-    padding: "10px 10px",
-    fontSize: "11.5px",
-    borderBottom: "1px solid #eef2f8",
-    verticalAlign: "top",
-    color: "#24324a",
-  },
-
-  rowAlt: {
-    background: "#fbfdff",
-  },
-
-  pill: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "8px 10px",
-    border: "1px solid #e3e9f5",
-    borderRadius: "999px",
-    background: "#fff",
-    fontSize: 11,
-    fontWeight: 900,
-    color: "#1f3b7a",
-  },
-
-  divider: {
-    height: "1px",
-    background: "linear-gradient(90deg, transparent, #e7edf7, transparent)",
-    margin: "14px 0",
-  },
-
-  modalBackdrop: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(8, 16, 32, 0.45)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-    padding: "14px",
-    backdropFilter: "blur(4px)",
-  },
-
-  modal: {
-    background: "#fff",
-    borderRadius: "16px",
-    padding: "20px",
-    maxWidth: "1150px",
-    width: "100%",
-    maxHeight: "90vh",
-    overflow: "auto",
-    border: "1px solid #e8edf7",
-    boxShadow: "0 18px 55px rgba(0,0,0,0.22)",
-  },
-
-  modalHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "10px",
-    marginBottom: "14px",
-    flexWrap: "wrap",
-  },
-
-  modalTitle: {
-    margin: 0,
-    fontSize: "18px",
-    fontWeight: "900",
-    color: "#0f1f3d",
-  },
-
-  detailGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "12px 16px",
-    fontSize: "12px",
-  },
-
-  detailLabel: {
-    color: "#6b7a94",
-    fontSize: "10px",
-    fontWeight: "900",
-  },
-
-  detailValue: {
-    fontWeight: "900",
-    fontSize: "13px",
-    color: "#0f1f3d",
-    marginTop: "3px",
-  },
-};
-
-const statusColors = {
-  BOOKED: { bg: "#fff3cd", color: "#856404" },
-  ON_WAY: { bg: "#cfe2ff", color: "#084298" },
-  UNLOADED: { bg: "#cff4fc", color: "#055160" },
-  AVAILABLE: { bg: "#d1e7dd", color: "#0f5132" },
-  SOLD: { bg: "#f8d7da", color: "#842029" },
+/* ---------------------------------
+   Helpers (NO backend changes)
+---------------------------------- */
+const safeNum = (v) => {
+  if (v === null || v === undefined) return 0;
+  if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+  const s = String(v).replace(/,/g, "").trim();
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
 };
 
 function formatDate(d) {
@@ -504,14 +25,6 @@ function formatDate(d) {
   if (Number.isNaN(date.getTime())) return "";
   return date.toISOString().slice(0, 10);
 }
-
-const safeNum = (v) => {
-  if (v === null || v === undefined) return 0;
-  if (typeof v === "number") return Number.isFinite(v) ? v : 0;
-  const s = String(v).replace(/,/g, "").trim();
-  const n = Number(s);
-  return Number.isFinite(n) ? n : 0;
-};
 
 function normalizeProductKey(p) {
   return (p || "").toString().trim().toLowerCase();
@@ -552,6 +65,37 @@ const getEffectiveStatus = (e) => {
   return s || "BOOKED";
 };
 
+const isSaleEntry = (e) => {
+  const cat = (e?.category || "").toString().trim().toUpperCase();
+  if (cat) return cat.includes("SALE");
+
+  const raw =
+    (e?.ledgerType ?? e?.type ?? e?.entryType ?? e?.transactionType ?? "")
+      .toString()
+      .trim()
+      .toUpperCase();
+
+  if (raw) {
+    const compact = raw.replace(/[\s_-]/g, "");
+    if (compact.includes("PURCHASE")) return false;
+    if (compact.includes("EXPENSE")) return false;
+    if (compact.includes("ADJUST")) return false;
+    if (compact.includes("RETURN") || compact.includes("REFUND")) return false;
+    if (compact.includes("SALE")) return true;
+  }
+
+  const debit = safeNum(e?.debit ?? e?.amount ?? 0);
+  const items =
+    (Array.isArray(e?.items) && e.items) ||
+    (Array.isArray(e?.products) && e.products) ||
+    (Array.isArray(e?.lineItems) && e.lineItems) ||
+    (Array.isArray(e?.details) && e.details) ||
+    null;
+
+  if (items && items.length && debit > 0) return true;
+  return false;
+};
+
 function getLedgerSaleQty(entry) {
   const direct = safeNum(
     entry?.quantity ??
@@ -562,7 +106,6 @@ function getLedgerSaleQty(entry) {
       entry?.totalQty ??
       0
   );
-
   if (direct !== 0) return Math.abs(direct);
 
   const items =
@@ -624,39 +167,30 @@ function getLedgerSaleQtyForProduct(entry, productType) {
   return sum;
 }
 
-const isSaleEntry = (e) => {
-  const cat = (e?.category || "").toString().trim().toUpperCase();
-  if (cat) return cat.includes("SALE");
-
-  const raw =
-    (e?.ledgerType ?? e?.type ?? e?.entryType ?? e?.transactionType ?? "")
-      .toString()
-      .trim()
-      .toUpperCase();
-
-  if (raw) {
-    const compact = raw.replace(/[\s_-]/g, "");
-    if (compact.includes("PURCHASE")) return false;
-    if (compact.includes("EXPENSE")) return false;
-    if (compact.includes("ADJUST")) return false;
-    if (compact.includes("RETURN") || compact.includes("REFUND")) return false;
-    if (compact.includes("SALE")) return true;
+function isSaleLinkedToEntry(sale, entry) {
+  if (!sale || !entry) return false;
+  const possibleKeys = [
+    "stockEntryId",
+    "stockId",
+    "entryId",
+    "sourceStockId",
+    "refStockId",
+  ];
+  for (const k of possibleKeys) {
+    if (sale[k] && String(sale[k]) === String(entry._id)) return true;
   }
-
-  const debit = safeNum(e?.debit ?? e?.amount ?? 0);
-  const items =
-    (Array.isArray(e?.items) && e.items) ||
-    (Array.isArray(e?.products) && e.products) ||
-    (Array.isArray(e?.lineItems) && e.lineItems) ||
-    (Array.isArray(e?.details) && e.details) ||
-    null;
-
-  if (items && items.length && debit > 0) return true;
+  if (
+    sale.stock &&
+    sale.stock._id &&
+    String(sale.stock._id) === String(entry._id)
+  )
+    return true;
   return false;
-};
+}
 
 function normalizeSaleRow(sale = {}, forcedQty = null, forcedType = null) {
-  const qty = forcedQty != null ? Number(forcedQty) || 0 : getLedgerSaleQty(sale);
+  const qty =
+    forcedQty != null ? Number(forcedQty) || 0 : getLedgerSaleQty(sale);
 
   const rate = Number(sale.rate ?? sale.saleRate ?? sale.unitRate ?? 0) || 0;
   const loading =
@@ -683,12 +217,7 @@ function normalizeSaleRow(sale = {}, forcedQty = null, forcedType = null) {
 
   const description = sale.description || sale.note || sale.remarks || "-";
 
-  const type =
-    forcedType ||
-    sale.productType ||
-    sale.type ||
-    sale.itemType ||
-    "";
+  const type = forcedType || sale.productType || sale.type || sale.itemType || "";
 
   const closingBalance =
     sale.closingBalance ?? sale.balance ?? sale.runningBalance ?? null;
@@ -714,26 +243,20 @@ function normalizeSaleRow(sale = {}, forcedQty = null, forcedType = null) {
   };
 }
 
-function isSaleLinkedToEntry(sale, entry) {
-  if (!sale || !entry) return false;
-  const possibleKeys = ["stockEntryId", "stockId", "entryId", "sourceStockId", "refStockId"];
-  for (const k of possibleKeys) {
-    if (sale[k] && String(sale[k]) === String(entry._id)) return true;
-  }
-  if (sale.stock && sale.stock._id && String(sale.stock._id) === String(entry._id)) return true;
-  return false;
-}
-
 function getSalesStats(sales = [], productType = null) {
   const key = normalizeProductKey(productType);
   const norm = sales.map((s) => {
-    const qty = key ? getLedgerSaleQtyForProduct(s, productType) : getLedgerSaleQty(s);
+    const qty = key
+      ? getLedgerSaleQtyForProduct(s, productType)
+      : getLedgerSaleQty(s);
     return normalizeSaleRow(s, qty, productType || null);
   });
 
   const totalQty = norm.reduce((sum, s) => sum + (Number(s.qty) || 0), 0);
   const totalDebit = norm.reduce((sum, s) => sum + (Number(s.debit) || 0), 0);
-  const uniqueClients = new Set(norm.map((s) => s.accountName).filter(Boolean)).size;
+  const uniqueClients = new Set(
+    norm.map((s) => s.accountName).filter(Boolean)
+  ).size;
 
   const avgRate =
     norm.length > 0
@@ -743,7 +266,7 @@ function getSalesStats(sales = [], productType = null) {
   return { totalQty, totalDebit, uniqueClients, avgRate };
 }
 
-/* ✅ Computes totalCost + effectiveRate WITH charges (fix issue permanently) */
+/* ✅ Computes totalCost + effectiveRate WITH charges */
 function calcEntryCosts(e) {
   const qty = safeNum(e?.quantity);
   const rate = safeNum(e?.purchaseRate);
@@ -757,10 +280,21 @@ function calcEntryCosts(e) {
   const totalCost = baseValue + totalCharges;
   const effectiveRate = qty > 0 ? totalCost / qty : 0;
 
-  return { qty, rate, loading, unloading, transport, other, totalCharges, baseValue, totalCost, effectiveRate };
+  return {
+    qty,
+    rate,
+    loading,
+    unloading,
+    transport,
+    other,
+    totalCharges,
+    baseValue,
+    totalCost,
+    effectiveRate,
+  };
 }
 
-/* ✅ FIXED: ledger-based sold-by-product (handles items arrays) */
+/* ✅ ledger-based sold-by-product (handles items arrays) */
 function computeLedgerSoldByProduct(ledgerSales = []) {
   const map = {};
 
@@ -775,17 +309,30 @@ function computeLedgerSoldByProduct(ledgerSales = []) {
     if (items && items.length) {
       for (const it of items) {
         const key = normalizeProductKey(
-          it?.productType ?? it?.type ?? it?.itemType ?? it?.product ?? it?.stockType
+          it?.productType ??
+            it?.type ??
+            it?.itemType ??
+            it?.product ??
+            it?.stockType
         );
         if (!key) continue;
 
-        const q = safeNum(it?.qty ?? it?.quantity ?? it?.soldQty ?? it?.soldQuantity ?? it?.saleQty ?? 0);
+        const q = safeNum(
+          it?.qty ??
+            it?.quantity ??
+            it?.soldQty ??
+            it?.soldQuantity ??
+            it?.saleQty ??
+            0
+        );
         map[key] = (map[key] || 0) + Math.abs(q);
       }
       continue;
     }
 
-    const key = normalizeProductKey(e?.productType ?? e?.type ?? e?.itemType ?? e?.product ?? e?.stockType);
+    const key = normalizeProductKey(
+      e?.productType ?? e?.type ?? e?.itemType ?? e?.product ?? e?.stockType
+    );
     if (!key) continue;
 
     const qty = getLedgerSaleQty(e);
@@ -819,8 +366,13 @@ function computeByProductFromEntries(entries = [], ledgerSoldMap = {}) {
     const { product, purchases, negatives } = groups[nKey];
 
     const totalPurchased = purchases.reduce((s, e) => s + getEntryQty(e), 0);
-    const soldFromNegatives = negatives.reduce((s, e) => s + Math.abs(getEntryQty(e)), 0);
-    const hasRemainingInfo = purchases.some((e) => getEntryRemainingRaw(e) !== null);
+    const soldFromNegatives = negatives.reduce(
+      (s, e) => s + Math.abs(getEntryQty(e)),
+      0
+    );
+    const hasRemainingInfo = purchases.some(
+      (e) => getEntryRemainingRaw(e) !== null
+    );
 
     const ledgerSold = safeNum(ledgerSoldMap[nKey] || 0);
 
@@ -868,7 +420,13 @@ function computeByProductFromEntries(entries = [], ledgerSoldMap = {}) {
       }
     }
 
-    result[product] = { totalPurchased, remaining, sold, purchaseValue, remainingValue };
+    result[product] = {
+      totalPurchased,
+      remaining,
+      sold,
+      purchaseValue,
+      remainingValue,
+    };
   }
 
   return result;
@@ -893,6 +451,563 @@ function downloadCSV(filename, rows) {
   URL.revokeObjectURL(url);
 }
 
+/* ---------------------------------
+   New Design System (Fresh Look)
+---------------------------------- */
+const ui = {
+  bg:
+    "radial-gradient(1200px 500px at 12% 10%, rgba(82,120,255,.18), transparent 55%)," +
+    "radial-gradient(900px 450px at 90% 20%, rgba(0,200,255,.10), transparent 55%)," +
+    "linear-gradient(180deg, #f7f9ff 0%, #f3f6ff 55%, #f7f9ff 100%)",
+  card: "rgba(255,255,255,.82)",
+  solidCard: "#ffffff",
+  stroke: "rgba(20, 33, 61, 0.10)",
+  stroke2: "rgba(20, 33, 61, 0.08)",
+  text: "#0b1220",
+  sub: "#58657a",
+  accent: "#1f4bff",
+  accent2: "#00b2ff",
+  danger: "#d90429",
+  ok: "#1b8a5a",
+  warn: "#c77d00",
+  shadow: "0 18px 50px rgba(15, 23, 42, 0.10)",
+  softShadow: "0 10px 26px rgba(15, 23, 42, 0.08)",
+};
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    background: ui.bg,
+    padding: "18px 12px 90px",
+    color: ui.text,
+  },
+  shell: {
+    maxWidth: 1520,
+    margin: "0 auto",
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: 14,
+  },
+  brandHeader: {
+    position: "sticky",
+    top: 10,
+    zIndex: 30,
+    background: ui.card,
+    backdropFilter: "blur(10px)",
+    border: `1px solid ${ui.stroke}`,
+    borderRadius: 18,
+    boxShadow: ui.softShadow,
+    padding: 14,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  brandLeft: { display: "flex", alignItems: "center", gap: 12, minWidth: 280 },
+  logo: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    background:
+      "linear-gradient(135deg, rgba(31,75,255,1) 0%, rgba(0,178,255,1) 100%)",
+    boxShadow: "0 12px 24px rgba(31,75,255,.25)",
+    display: "grid",
+    placeItems: "center",
+    color: "#fff",
+    fontWeight: 1000,
+    letterSpacing: ".5px",
+    fontSize: 18,
+    flex: "0 0 auto",
+  },
+  brandTitle: { fontSize: 18, fontWeight: 1000, letterSpacing: ".2px" },
+  brandSub: { marginTop: 2, fontSize: 11, color: ui.sub, fontWeight: 800 },
+  topActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  },
+  btn: {
+    border: `1px solid ${ui.stroke}`,
+    background: ui.solidCard,
+    padding: "10px 12px",
+    borderRadius: 12,
+    fontWeight: 950,
+    cursor: "pointer",
+    fontSize: 12,
+    color: ui.text,
+    display: "inline-flex",
+    gap: 8,
+    alignItems: "center",
+    boxShadow: "0 10px 18px rgba(15,23,42,.05)",
+    whiteSpace: "nowrap",
+  },
+  btnPrimary: {
+    border: "none",
+    background:
+      "linear-gradient(135deg, rgba(31,75,255,1) 0%, rgba(0,178,255,1) 100%)",
+    color: "#fff",
+    padding: "10px 13px",
+    borderRadius: 12,
+    fontWeight: 1000,
+    cursor: "pointer",
+    fontSize: 12,
+    display: "inline-flex",
+    gap: 8,
+    alignItems: "center",
+    boxShadow: "0 14px 26px rgba(31,75,255,.22)",
+    whiteSpace: "nowrap",
+  },
+  btnDanger: {
+    border: "none",
+    background:
+      "linear-gradient(135deg, rgba(217,4,41,1) 0%, rgba(156,0,24,1) 100%)",
+    color: "#fff",
+    padding: "10px 13px",
+    borderRadius: 12,
+    fontWeight: 1000,
+    cursor: "pointer",
+    fontSize: 12,
+    display: "inline-flex",
+    gap: 8,
+    alignItems: "center",
+    boxShadow: "0 14px 26px rgba(217,4,41,.18)",
+    whiteSpace: "nowrap",
+  },
+  grid2: {
+    display: "grid",
+    gridTemplateColumns: "1.35fr .65fr",
+    gap: 14,
+  },
+  panel: {
+    background: ui.card,
+    backdropFilter: "blur(10px)",
+    border: `1px solid ${ui.stroke}`,
+    borderRadius: 18,
+    boxShadow: ui.softShadow,
+    overflow: "hidden",
+  },
+  panelHead: {
+    padding: "14px 14px 10px",
+    borderBottom: `1px solid ${ui.stroke2}`,
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    gap: 10,
+    flexWrap: "wrap",
+  },
+  panelTitle: { margin: 0, fontSize: 14, fontWeight: 1000 },
+  panelHint: { fontSize: 11, color: ui.sub, fontWeight: 800 },
+  panelBody: { padding: 14 },
+  kpis: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+    gap: 12,
+  },
+  kpi: {
+    background: ui.solidCard,
+    border: `1px solid ${ui.stroke2}`,
+    borderRadius: 16,
+    padding: 14,
+    boxShadow: "0 10px 20px rgba(15,23,42,.05)",
+    position: "relative",
+    overflow: "hidden",
+  },
+  kpiBar: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: "100%",
+    height: 4,
+    background:
+      "linear-gradient(90deg, rgba(31,75,255,1), rgba(0,178,255,1), rgba(31,75,255,1))",
+    opacity: 0.9,
+  },
+  kpiLabel: {
+    fontSize: 10.5,
+    color: ui.sub,
+    fontWeight: 1000,
+    letterSpacing: ".6px",
+  },
+  kpiValue: { marginTop: 6, fontSize: 22, fontWeight: 1000 },
+  kpiSub: { marginTop: 2, fontSize: 11, color: ui.sub, fontWeight: 800 },
+  toolRow: {
+    display: "grid",
+    gridTemplateColumns: "1.2fr .8fr",
+    gap: 12,
+  },
+  input: {
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "10px 11px",
+    borderRadius: 12,
+    border: `1px solid ${ui.stroke}`,
+    outline: "none",
+    background: "#fff",
+    fontSize: 12,
+    fontWeight: 800,
+    color: ui.text,
+  },
+  select: {
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "10px 11px",
+    borderRadius: 12,
+    border: `1px solid ${ui.stroke}`,
+    outline: "none",
+    background: "#fff",
+    fontSize: 12,
+    fontWeight: 850,
+    color: ui.text,
+  },
+  miniRow: { display: "grid", gridTemplateColumns: "1fr 140px 140px", gap: 10 },
+  badge: (bg, color) => ({
+    display: "inline-block",
+    padding: "6px 10px",
+    borderRadius: 999,
+    background: bg,
+    color: color,
+    fontWeight: 1000,
+    fontSize: 10,
+    letterSpacing: ".4px",
+    border: `1px solid ${ui.stroke2}`,
+    whiteSpace: "nowrap",
+  }),
+  tableWrap: {
+    border: `1px solid ${ui.stroke}`,
+    borderRadius: 16,
+    overflowX: "auto",
+    background: ui.solidCard,
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "separate",
+    borderSpacing: 0,
+    minWidth: 1250,
+  },
+  th: {
+    position: "sticky",
+    top: 0,
+    zIndex: 2,
+    textAlign: "left",
+    padding: "12px 10px",
+    fontSize: 11,
+    fontWeight: 1000,
+    color: "#0c2c7a",
+    background:
+      "linear-gradient(180deg, rgba(240,246,255,1) 0%, rgba(232,241,255,1) 100%)",
+    borderBottom: `1px solid ${ui.stroke}`,
+    whiteSpace: "nowrap",
+    cursor: "default",
+  },
+  td: {
+    padding: "11px 10px",
+    borderBottom: `1px solid ${ui.stroke2}`,
+    fontSize: 12,
+    color: ui.text,
+    verticalAlign: "top",
+  },
+  rowAlt: { background: "rgba(247,250,255,.75)" },
+  actionBtn: {
+    border: `1px solid ${ui.stroke}`,
+    background: "#fff",
+    padding: "7px 10px",
+    borderRadius: 11,
+    fontWeight: 950,
+    cursor: "pointer",
+    fontSize: 11,
+    whiteSpace: "nowrap",
+  },
+  actionDanger: {
+    border: "none",
+    background:
+      "linear-gradient(135deg, rgba(217,4,41,1) 0%, rgba(156,0,24,1) 100%)",
+    color: "#fff",
+    padding: "7px 10px",
+    borderRadius: 11,
+    fontWeight: 1000,
+    cursor: "pointer",
+    fontSize: 11,
+    whiteSpace: "nowrap",
+  },
+  footerBar: {
+    position: "fixed",
+    left: 0,
+    right: 0,
+    bottom: 12,
+    display: "flex",
+    justifyContent: "center",
+    zIndex: 50,
+    pointerEvents: "none",
+  },
+  bulkBar: {
+    pointerEvents: "auto",
+    width: "min(1100px, calc(100% - 24px))",
+    background: ui.card,
+    backdropFilter: "blur(12px)",
+    border: `1px solid ${ui.stroke}`,
+    borderRadius: 16,
+    boxShadow: ui.shadow,
+    padding: 10,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    flexWrap: "wrap",
+  },
+};
+
+/* Status Colors */
+const statusColors = {
+  BOOKED: { bg: "#fff2cc", color: "#7a5b00" },
+  ON_WAY: { bg: "#dbe7ff", color: "#0c2c7a" },
+  UNLOADED: { bg: "#dff7ff", color: "#0a5566" },
+  AVAILABLE: { bg: "#dcfce7", color: "#14532d" },
+  SOLD: { bg: "#ffe0e3", color: "#7f1d1d" },
+};
+
+const LS_VIEWS_KEY = "stock_dashboard_views_v1";
+
+/* ✅ NEW: Stock Transfers (LocalStorage only — no backend changes) */
+const LS_TRANSFERS_KEY = "stock_transfers_v1";
+const uid = () => `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+const escapeHtml = (s) =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+function getTransfersLS() {
+  try {
+    const raw = localStorage.getItem(LS_TRANSFERS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+function setTransfersLS(list) {
+  try {
+    localStorage.setItem(LS_TRANSFERS_KEY, JSON.stringify(Array.isArray(list) ? list : []));
+  } catch {
+    // ignore
+  }
+}
+
+/* ---------------------------------
+   SweetAlert2 Wizard (NEW ENTRY)
+---------------------------------- */
+function buildWizardHTML(step, data = {}, options = {}) {
+  const products = options.products || [];
+  const suppliers = options.suppliers || [];
+
+  const datalistProducts = products
+    .map((p) => `<option value="${String(p).replace(/"/g, "&quot;")}"></option>`)
+    .join("");
+  const datalistSuppliers = suppliers
+    .map((s) => `<option value="${String(s).replace(/"/g, "&quot;")}"></option>`)
+    .join("");
+
+  const field = (label, id, type = "text", placeholder = "", extra = "") => `
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <div style="font-weight:900; font-size:11px; color:#0b1220; letter-spacing:.2px;">${label}</div>
+      <input id="${id}" type="${type}" placeholder="${placeholder}"
+        value="${String(data[id] ?? "").replace(/"/g, "&quot;")}"
+        style="padding:10px 11px; border-radius:12px; border:1px solid rgba(20,33,61,.15); outline:none; font-size:12px; font-weight:800; background:#fff;" ${extra} />
+    </div>
+  `;
+
+  const select = (label, id, items = []) => {
+    const val = String(data[id] ?? "");
+    return `
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div style="font-weight:900; font-size:11px; color:#0b1220; letter-spacing:.2px;">${label}</div>
+        <select id="${id}"
+          style="padding:10px 11px; border-radius:12px; border:1px solid rgba(20,33,61,.15); outline:none; font-size:12px; font-weight:900; background:#fff;">
+          ${items
+            .map(
+              (it) =>
+                `<option value="${it.value}" ${String(it.value) === val ? "selected" : ""}>${it.label}</option>`
+            )
+            .join("")}
+        </select>
+      </div>
+    `;
+  };
+
+  const textarea = (label, id, placeholder = "") => `
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <div style="font-weight:900; font-size:11px; color:#0b1220; letter-spacing:.2px;">${label}</div>
+      <textarea id="${id}" placeholder="${placeholder}"
+        style="padding:10px 11px; border-radius:12px; border:1px solid rgba(20,33,61,.15); outline:none; font-size:12px; font-weight:800; background:#fff; min-height:88px; resize:vertical;">${String(
+          data[id] ?? ""
+        )}</textarea>
+    </div>
+  `;
+
+  const costBox = `
+    <div style="margin-top:10px; padding:12px; border-radius:14px; border:1px solid rgba(20,33,61,.10);
+      background: linear-gradient(135deg, rgba(31,75,255,.08), rgba(0,178,255,.06));
+    ">
+      <div style="font-weight:1000; font-size:11px; letter-spacing:.4px; color:#0c2c7a;">Live Cost Preview</div>
+      <div id="cost-preview" style="margin-top:8px; display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:8px;">
+        <div style="padding:10px; border-radius:12px; background:#fff; border:1px solid rgba(20,33,61,.08);">
+          <div style="font-size:10px; color:#58657a; font-weight:900;">Base</div>
+          <div id="pv-base" style="font-weight:1000; font-size:13px;">₨ 0</div>
+        </div>
+        <div style="padding:10px; border-radius:12px; background:#fff; border:1px solid rgba(20,33,61,.08);">
+          <div style="font-size:10px; color:#58657a; font-weight:900;">Charges</div>
+          <div id="pv-chg" style="font-weight:1000; font-size:13px;">₨ 0</div>
+        </div>
+        <div style="padding:10px; border-radius:12px; background:#fff; border:1px solid rgba(20,33,61,.08);">
+          <div style="font-size:10px; color:#58657a; font-weight:900;">Total</div>
+          <div id="pv-total" style="font-weight:1000; font-size:13px; color:#1f4bff;">₨ 0</div>
+        </div>
+        <div style="padding:10px; border-radius:12px; background:#fff; border:1px solid rgba(20,33,61,.08);">
+          <div style="font-size:10px; color:#58657a; font-weight:900;">Eff/Unit</div>
+          <div id="pv-eff" style="font-weight:1000; font-size:13px;">₨ 0</div>
+        </div>
+      </div>
+      <div style="margin-top:8px; font-size:10px; color:#58657a; font-weight:800;">
+        Tip: Fill Qty + Rate and optional charges — effective rate updates automatically.
+      </div>
+    </div>
+  `;
+
+  if (step === 0) {
+    return `
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        <div style="grid-column:1/-1; padding:10px 12px; border-radius:14px; border:1px solid rgba(20,33,61,.10);
+          background: linear-gradient(135deg, rgba(31,75,255,.08), rgba(0,178,255,.06));">
+          <div style="font-weight:1000; font-size:12px; color:#0b1220;">Step 1 — Basics</div>
+          <div style="font-size:10.5px; color:#58657a; font-weight:800; margin-top:3px;">
+            Product, date, quantity, rate, status and supplier info.
+          </div>
+        </div>
+
+        ${field("Product Type *", "productType", "text", "e.g. Coil / Sheet", `list="swal-products"`)}
+        ${select("Status", "status", [
+          { value: "BOOKED", label: "Booked" },
+          { value: "ON_WAY", label: "On Way" },
+          { value: "UNLOADED", label: "Unloaded" },
+          { value: "AVAILABLE", label: "Available" },
+        ])}
+
+        ${field("Purchase Date *", "purchaseDate", "date")}
+        ${field("Quantity *", "quantity", "number", "0", `step="0.01" min="0"`)}
+        ${field("Purchase Rate *", "purchaseRate", "number", "0", `step="0.01" min="0"`)}
+        ${field("Supplier Name", "supplierName", "text", "Optional", `list="swal-suppliers"`)}
+        ${field("Supplier Invoice No", "supplierInvoiceNo", "text", "Optional")}
+
+        <datalist id="swal-products">${datalistProducts}</datalist>
+        <datalist id="swal-suppliers">${datalistSuppliers}</datalist>
+      </div>
+      ${costBox}
+    `;
+  }
+
+  if (step === 1) {
+    return `
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        <div style="grid-column:1/-1; padding:10px 12px; border-radius:14px; border:1px solid rgba(20,33,61,.10);
+          background: linear-gradient(135deg, rgba(31,75,255,.08), rgba(0,178,255,.06));">
+          <div style="font-weight:1000; font-size:12px; color:#0b1220;">Step 2 — Charges</div>
+          <div style="font-size:10.5px; color:#58657a; font-weight:800; margin-top:3px;">
+            Add all charges — total cost and effective/unit will be accurate.
+          </div>
+        </div>
+
+        ${field("Loading Charges", "loadingCharges", "number", "0", `step="0.01" min="0"`)}
+        ${field("Unloading Charges", "unloadingCharges", "number", "0", `step="0.01" min="0"`)}
+        ${field("Transport Charges", "transportCharges", "number", "0", `step="0.01" min="0"`)}
+        ${field("Other Charges", "otherCharges", "number", "0", `step="0.01" min="0"`)}
+        <div style="grid-column:1/-1;">
+          ${field("Other Charges Description", "otherChargesDescription", "text", "Optional")}
+        </div>
+      </div>
+      ${costBox}
+    `;
+  }
+
+  return `
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+      <div style="grid-column:1/-1; padding:10px 12px; border-radius:14px; border:1px solid rgba(20,33,61,.10);
+        background: linear-gradient(135deg, rgba(31,75,255,.08), rgba(0,178,255,.06));">
+        <div style="font-weight:1000; font-size:12px; color:#0b1220;">Step 3 — Logistics & Notes</div>
+        <div style="font-size:10.5px; color:#58657a; font-weight:800; margin-top:3px;">
+          Optional details for tracking and operations.
+        </div>
+      </div>
+
+      ${field("Transport Company", "transportCompany", "text", "Optional")}
+      ${field("Vehicle Number", "vehicleNumber", "text", "Optional")}
+      ${field("Warehouse Location", "warehouseLocation", "text", "Optional")}
+      ${field("Expected Arrival Date", "expectedArrivalDate", "date")}
+      <div style="grid-column:1/-1;">
+        ${textarea("Notes", "notes", "Add any remark...")}
+      </div>
+    </div>
+    ${costBox}
+  `;
+}
+
+function bindCostPreview(getVal) {
+  const update = () => {
+    const qty = safeNum(getVal("quantity"));
+    const rate = safeNum(getVal("purchaseRate"));
+    const loading = safeNum(getVal("loadingCharges"));
+    const unloading = safeNum(getVal("unloadingCharges"));
+    const transport = safeNum(getVal("transportCharges"));
+    const other = safeNum(getVal("otherCharges"));
+
+    const base = qty * rate;
+    const chg = loading + unloading + transport + other;
+    const total = base + chg;
+    const eff = qty > 0 ? total / qty : 0;
+
+    const set = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+
+    set("pv-base", `₨ ${Number(base || 0).toLocaleString()}`);
+    set("pv-chg", `₨ ${Number(chg || 0).toLocaleString()}`);
+    set("pv-total", `₨ ${Number(total || 0).toLocaleString()}`);
+    set("pv-eff", `₨ ${Number(eff || 0).toFixed(4)}`);
+  };
+
+  update();
+  const ids = [
+    "quantity",
+    "purchaseRate",
+    "loadingCharges",
+    "unloadingCharges",
+    "transportCharges",
+    "otherCharges",
+  ];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", update);
+    el.addEventListener("change", update);
+  });
+}
+
+function readWizardValues(keys) {
+  const obj = {};
+  keys.forEach((k) => {
+    const el = document.getElementById(k);
+    obj[k] = el ? el.value : "";
+  });
+  return obj;
+}
+
+/* ---------------------------------
+   Component
+---------------------------------- */
 function StockDashboard() {
   const navigate = useNavigate();
 
@@ -900,10 +1015,8 @@ function StockDashboard() {
   const [entries, setEntries] = useState([]);
   const [ledgerSales, setLedgerSales] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // ✅ PRO Controls
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState({ key: "purchaseDate", dir: "desc" });
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -915,29 +1028,12 @@ function StockDashboard() {
     supplierName: "",
   });
 
-  const [form, setForm] = useState({
-    productType: "",
-    status: "BOOKED",
-    purchaseDate: "",
-    quantity: "",
-    purchaseRate: "",
-    supplierName: "",
-    supplierInvoiceNo: "",
-    transportCompany: "",
-    vehicleNumber: "",
-    warehouseLocation: "",
-    loadingCharges: "",
-    unloadingCharges: "",
-    transportCharges: "",
-    otherCharges: "",
-    otherChargesDescription: "",
-    expectedArrivalDate: "",
-    notes: "",
-  });
-
-  const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({});
   const [viewingEntry, setViewingEntry] = useState(null);
+
+  /* ✅ NEW: Transfers state (local only) */
+  const [transfers, setTransfers] = useState(() => getTransfersLS());
+
+  const companyName = "AYAN STEEL"; // change if you want (or load from localStorage)
 
   const loadData = async () => {
     try {
@@ -959,7 +1055,7 @@ function StockDashboard() {
       const allLedger = Array.isArray(ledgerRes.data) ? ledgerRes.data : [];
       const salesOnly = allLedger.filter(isSaleEntry);
 
-      // ✅ Auto mark SOLD if sold by qty/remaining
+      // Auto mark SOLD if sold by qty/remaining (backend status)
       const toMarkSold = rawEntries.filter((e) => {
         const effective = getEffectiveStatus(e);
         const current = (e?.status || "").toString().trim().toUpperCase();
@@ -968,12 +1064,16 @@ function StockDashboard() {
 
       if (toMarkSold.length > 0) {
         await Promise.allSettled(
-          toMarkSold.map((e) => api.post(`/api/stock/${e._id}/update-status`, { status: "SOLD" }))
+          toMarkSold.map((e) =>
+            api.post(`/api/stock/${e._id}/update-status`, { status: "SOLD" })
+          )
         );
 
         const soldSet = new Set(toMarkSold.map((x) => String(x._id)));
         for (let i = 0; i < rawEntries.length; i++) {
-          if (soldSet.has(String(rawEntries[i]._id))) rawEntries[i] = { ...rawEntries[i], status: "SOLD" };
+          if (soldSet.has(String(rawEntries[i]._id))) {
+            rawEntries[i] = { ...rawEntries[i], status: "SOLD" };
+          }
         }
 
         try {
@@ -988,9 +1088,10 @@ function StockDashboard() {
 
       setEntries(rawEntries);
       setLedgerSales(salesOnly);
-
-      // reset selection if items changed a lot
       setSelectedIds(new Set());
+
+      // refresh transfers from LS (so they reflect immediately)
+      setTransfers(getTransfersLS());
     } catch (err) {
       console.error(err);
       setError("Error loading stock dashboard.");
@@ -1004,237 +1105,256 @@ function StockDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const uniqueProducts = useMemo(
+    () => [...new Set(entries.map((e) => e.productType).filter(Boolean))].sort(),
+    [entries]
+  );
+  const uniqueSuppliers = useMemo(
+    () => [...new Set(entries.map((e) => e.supplierName).filter(Boolean))].sort(),
+    [entries]
+  );
+
+  const ledgerSoldByProduct = useMemo(() => {
+    if (!Array.isArray(ledgerSales) || ledgerSales.length === 0) return {};
+    return computeLedgerSoldByProduct(ledgerSales);
+  }, [ledgerSales]);
+
+  /* ✅ Transfers Maps */
+  const transferOutByEntryId = useMemo(() => {
+    const m = {};
+    (transfers || []).forEach((t) => {
+      const id = String(t?.fromEntryId || "").trim();
+      if (!id) return;
+      m[id] = (m[id] || 0) + safeNum(t?.qty);
+    });
+    return m;
+  }, [transfers]);
+
+  const getTransferredOutForEntry = (entryId) => safeNum(transferOutByEntryId[String(entryId)] || 0);
+
+  const getEntryRemainingNow = (entry) => {
+    const baseRem = getEntryRemaining(entry); // backend remaining / computed
+    const out = getTransferredOutForEntry(entry?._id);
+    const nowRem = baseRem - out;
+    return nowRem > 0 ? nowRem : 0;
   };
 
-  // ✅ FIXED: charges included
-  const calculateTotalCost = () => {
-    const qty = safeNum(form.quantity);
-    const rate = safeNum(form.purchaseRate);
-    const loading = safeNum(form.loadingCharges);
-    const unloading = safeNum(form.unloadingCharges);
-    const transport = safeNum(form.transportCharges);
-    const other = safeNum(form.otherCharges);
+  /* ✅ Base by-product + Adjust with Transfers */
+  const baseByProduct = useMemo(
+    () => computeByProductFromEntries(entries, ledgerSoldByProduct),
+    [entries, ledgerSoldByProduct]
+  );
 
-    const baseValue = qty * rate;
-    const totalCharges = loading + unloading + transport + other;
-    const totalCost = baseValue + totalCharges;
-    const effectiveRate = qty > 0 ? totalCost / qty : 0;
+  const localByProduct = useMemo(() => {
+    const base = baseByProduct || {};
 
-    return { baseValue, totalCharges, totalCost, effectiveRate };
-  };
+    const outQty = {};
+    const inQty = {};
+    const outVal = {};
+    const inVal = {};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    (transfers || []).forEach((t) => {
+      const q = safeNum(t?.qty);
+      if (q <= 0) return;
 
-    const qty = safeNum(form.quantity);
-    const rate = safeNum(form.purchaseRate);
+      const fromKey = normalizeProductKey(t?.fromProductType);
+      const toKey = normalizeProductKey(t?.toProductType);
+      const unit = safeNum(t?.unitCost);
 
-    if (!form.productType || !form.purchaseDate || qty <= 0 || rate < 0) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Missing / invalid fields",
-        text: "Please fill product type, purchase date, and valid quantity + rate.",
-      });
-      return;
-    }
+      if (fromKey) {
+        outQty[fromKey] = (outQty[fromKey] || 0) + q;
+        outVal[fromKey] = (outVal[fromKey] || 0) + q * unit;
+      }
+      if (toKey) {
+        inQty[toKey] = (inQty[toKey] || 0) + q;
+        inVal[toKey] = (inVal[toKey] || 0) + q * unit;
+      }
+    });
 
-    // ✅ PRO sanity checks
-    const anyNegativeCharges =
-      safeNum(form.loadingCharges) < 0 ||
-      safeNum(form.unloadingCharges) < 0 ||
-      safeNum(form.transportCharges) < 0 ||
-      safeNum(form.otherCharges) < 0;
+    const baseKeyToLabel = {};
+    Object.keys(base).forEach((label) => {
+      const k = normalizeProductKey(label);
+      if (k && !baseKeyToLabel[k]) baseKeyToLabel[k] = label;
+    });
 
-    if (anyNegativeCharges) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Invalid charges",
-        text: "Charges cannot be negative.",
-      });
-      return;
-    }
+    const allKeys = new Set([
+      ...Object.keys(baseKeyToLabel),
+      ...Object.keys(outQty),
+      ...Object.keys(inQty),
+    ]);
 
-    try {
-      setSaving(true);
+    const pickLabel = (nKey) => {
+      if (baseKeyToLabel[nKey]) return baseKeyToLabel[nKey];
+      const tIn = (transfers || []).find((x) => normalizeProductKey(x?.toProductType) === nKey);
+      if (tIn?.toProductType) return tIn.toProductType;
+      const tOut = (transfers || []).find((x) => normalizeProductKey(x?.fromProductType) === nKey);
+      if (tOut?.fromProductType) return tOut.fromProductType;
+      return nKey || "-";
+    };
 
-      // ✅ send numeric values (backend safe)
-      await api.post("/api/stock", {
-        ...form,
-        quantity: qty,
-        purchaseRate: rate,
-        loadingCharges: safeNum(form.loadingCharges),
-        unloadingCharges: safeNum(form.unloadingCharges),
-        transportCharges: safeNum(form.transportCharges),
-        otherCharges: safeNum(form.otherCharges),
+    const merged = {};
+    allKeys.forEach((nKey) => {
+      const label = pickLabel(nKey);
+      const baseLabel = baseKeyToLabel[nKey];
+      const b = baseLabel
+        ? base[baseLabel]
+        : { totalPurchased: 0, remaining: 0, sold: 0, purchaseValue: 0, remainingValue: 0 };
 
-        // ✅ extra fields (backend may ignore, but harmless)
-        totalCost: calculateTotalCost().totalCost,
-        effectiveRate: calculateTotalCost().effectiveRate,
-      });
+      const oQ = safeNum(outQty[nKey] || 0);
+      const iQ = safeNum(inQty[nKey] || 0);
+      const oV = safeNum(outVal[nKey] || 0);
+      const iV = safeNum(inVal[nKey] || 0);
 
-      setForm({
-        productType: "",
-        status: "BOOKED",
-        purchaseDate: "",
-        quantity: "",
-        purchaseRate: "",
-        supplierName: "",
-        supplierInvoiceNo: "",
-        transportCompany: "",
-        vehicleNumber: "",
-        warehouseLocation: "",
-        loadingCharges: "",
-        unloadingCharges: "",
-        transportCharges: "",
-        otherCharges: "",
-        otherChargesDescription: "",
-        expectedArrivalDate: "",
-        notes: "",
-      });
+      const remaining = Math.max(0, safeNum(b.remaining) - oQ + iQ);
+      const remainingValue = Math.max(0, safeNum(b.remainingValue) - oV + iV);
 
-      await loadData();
+      merged[label] = {
+        ...b,
+        remaining,
+        remainingValue,
+        transferOut: oQ,
+        transferIn: iQ,
+      };
+    });
 
-      await Swal.fire({
-        icon: "success",
-        title: "Stock entry saved",
-        timer: 1100,
-        showConfirmButton: false,
-      });
-    } catch (err) {
-      console.error("Full error:", err);
-      const errorMessage = err.response?.data?.message || "Error saving stock entry.";
-      Swal.fire({ icon: "error", title: "Error", text: errorMessage });
-    } finally {
-      setSaving(false);
-    }
-  };
+    const sorted = {};
+    Object.keys(merged)
+      .sort((a, b) => String(a).localeCompare(String(b)))
+      .forEach((k) => (sorted[k] = merged[k]));
+    return sorted;
+  }, [baseByProduct, transfers]);
 
+  const stockBasedSoldQtyOverall = useMemo(() => {
+    const allNeg = entries.filter((e) => getEntryQty(e) < 0);
+    if (allNeg.length > 0)
+      return allNeg.reduce((s, e) => s + Math.abs(getEntryQty(e)), 0);
 
+    return entries.reduce((s, e) => {
+      const q = getEntryQty(e);
+      const r = getEntryRemaining(e);
+      const diff = q - r;
+      return s + (diff > 0 ? diff : 0);
+    }, 0);
+  }, [entries]);
 
+  const ledgerBasedSoldQtyOverall = useMemo(() => {
+    if (!Array.isArray(ledgerSales) || ledgerSales.length === 0) return 0;
+    return ledgerSales.reduce((sum, e) => sum + getLedgerSaleQty(e), 0);
+  }, [ledgerSales]);
 
-  const startEdit = (entry) => {
-    setEditingId(entry._id);
-    setEditForm({
-      productType: entry.productType || "",
-      status: entry.status || "BOOKED",
-      purchaseDate: formatDate(entry.purchaseDate),
-      quantity: entry.quantity ?? "",
-      purchaseRate: entry.purchaseRate ?? "",
-      supplierName: entry.supplierName || "",
-      supplierInvoiceNo: entry.supplierInvoiceNo || "",
-      transportCompany: entry.transportCompany || "",
-      vehicleNumber: entry.vehicleNumber || "",
-      warehouseLocation: entry.warehouseLocation || "",
-      loadingCharges: entry.loadingCharges ?? "",
-      unloadingCharges: entry.unloadingCharges ?? "",
-      transportCharges: entry.transportCharges ?? "",
-      otherCharges: entry.otherCharges ?? "",
-      otherChargesDescription: entry.otherChargesDescription || "",
-      expectedArrivalDate: formatDate(entry.expectedArrivalDate),
-      notes: entry.notes || "",
+  const totalSoldQtyOverall = useMemo(
+    () => (ledgerBasedSoldQtyOverall > 0 ? ledgerBasedSoldQtyOverall : stockBasedSoldQtyOverall),
+    [ledgerBasedSoldQtyOverall, stockBasedSoldQtyOverall]
+  );
+
+  const totalPurchasedOverall = useMemo(() => {
+    return entries.reduce((sum, e) => {
+      const q = getEntryQty(e);
+      return q > 0 ? sum + q : sum;
+    }, 0);
+  }, [entries]);
+
+  const totalPurchasedValueOverall = useMemo(() => {
+    return entries.reduce((sum, e) => {
+      const q = getEntryQty(e);
+      if (q <= 0) return sum;
+      return sum + calcEntryCosts(e).totalCost;
+    }, 0);
+  }, [entries]);
+
+  const availableQtyOverall = useMemo(() => {
+    const purchased = safeNum(totalPurchasedOverall);
+    const sold = safeNum(totalSoldQtyOverall);
+    const diff = purchased - sold;
+    return diff > 0 ? diff : 0;
+  }, [totalPurchasedOverall, totalSoldQtyOverall]);
+
+  const availableValueOverall = useMemo(() => {
+    if (availableQtyOverall <= 0 || totalPurchasedOverall <= 0) return 0;
+    const avgUnitCost = totalPurchasedValueOverall / totalPurchasedOverall;
+    return avgUnitCost * availableQtyOverall;
+  }, [availableQtyOverall, totalPurchasedOverall, totalPurchasedValueOverall]);
+
+  const lowStockProducts = useMemo(() => {
+    const threshold = safeNum(lowStockThreshold);
+    if (!localByProduct || threshold <= 0) return [];
+    return Object.entries(localByProduct)
+      .map(([product, data]) => ({ product, remaining: safeNum(data.remaining) }))
+      .filter((x) => x.remaining > 0 && x.remaining <= threshold)
+      .sort((a, b) => a.remaining - b.remaining);
+  }, [localByProduct, lowStockThreshold]);
+
+  const filteredEntries = useMemo(() => {
+    const text = (searchText || "").trim().toLowerCase();
+    const base = [...entries];
+
+    const searched =
+      text.length === 0
+        ? base
+        : base.filter((e) => {
+            const blob = [
+              e.productType,
+              e.supplierName,
+              e.supplierInvoiceNo,
+              e.transportCompany,
+              e.vehicleNumber,
+              e.warehouseLocation,
+              e.notes,
+              formatDate(e.purchaseDate),
+              e.status,
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+            return blob.includes(text);
+          });
+
+    const { key, dir } = sort || {};
+    const sign = dir === "asc" ? 1 : -1;
+
+    searched.sort((a, b) => {
+      if (key === "purchaseDate") {
+        const av = new Date(a.purchaseDate || 0).getTime();
+        const bv = new Date(b.purchaseDate || 0).getTime();
+        return (av - bv) * sign;
+      }
+      if (key === "productType") {
+        return String(a.productType || "").localeCompare(String(b.productType || "")) * sign;
+      }
+      if (key === "qty") return (getEntryQty(a) - getEntryQty(b)) * sign;
+
+      // ✅ sort by current remaining (after transfers)
+      if (key === "remaining") return (getEntryRemainingNow(a) - getEntryRemainingNow(b)) * sign;
+
+      if (key === "totalCost") return (calcEntryCosts(a).totalCost - calcEntryCosts(b).totalCost) * sign;
+      return 0;
+    });
+
+    return searched;
+  }, [entries, searchText, sort, transferOutByEntryId]);
+
+  /* ----------------------------
+     Selection + Bulk
+  ----------------------------- */
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      const s = String(id);
+      if (next.has(s)) next.delete(s);
+      else next.add(s);
+      return next;
     });
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditForm({});
-  };
-
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const saveEdit = async (id) => {
-    const qty = safeNum(editForm.quantity);
-    const rate = safeNum(editForm.purchaseRate);
-
-    if (!editForm.productType || !editForm.purchaseDate) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Missing fields",
-        text: "Please fill product type and purchase date.",
-      });
-      return;
-    }
-
-    if (qty < 0 || rate < 0) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Invalid values",
-        text: "Quantity/Rate cannot be negative.",
-      });
-      return;
-    }
-
-    try {
-      await api.put(`/api/stock/${id}`, {
-        ...editForm,
-        quantity: qty,
-        purchaseRate: rate,
-        loadingCharges: safeNum(editForm.loadingCharges),
-        unloadingCharges: safeNum(editForm.unloadingCharges),
-        transportCharges: safeNum(editForm.transportCharges),
-        otherCharges: safeNum(editForm.otherCharges),
-
-        // ✅ extra fields (safe)
-        totalCost: calcEntryCosts({
-          quantity: qty,
-          purchaseRate: rate,
-          loadingCharges: editForm.loadingCharges,
-          unloadingCharges: editForm.unloadingCharges,
-          transportCharges: editForm.transportCharges,
-          otherCharges: editForm.otherCharges,
-        }).totalCost,
-        effectiveRate: calcEntryCosts({
-          quantity: qty,
-          purchaseRate: rate,
-          loadingCharges: editForm.loadingCharges,
-          unloadingCharges: editForm.unloadingCharges,
-          transportCharges: editForm.transportCharges,
-          otherCharges: editForm.otherCharges,
-        }).effectiveRate,
-      });
-
-      setEditingId(null);
-      await loadData();
-
-      await Swal.fire({
-        icon: "success",
-        title: "Stock entry updated",
-        timer: 1000,
-        showConfirmButton: false,
-      });
-    } catch (err) {
-      console.error(err);
-      Swal.fire({ icon: "error", title: "Error", text: "Error updating stock entry." });
-    }
-  };
-
-  const deleteEntry = async (id) => {
-    const result = await Swal.fire({
-      title: "Delete stock entry?",
-      text: "This will permanently remove this stock entry.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, delete",
-      cancelButtonText: "Cancel",
+  const selectAllVisible = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      const ids = filteredEntries.map((e) => String(e._id));
+      const allSelected = ids.length > 0 && ids.every((id) => next.has(id));
+      if (allSelected) ids.forEach((id) => next.delete(id));
+      else ids.forEach((id) => next.add(id));
+      return next;
     });
-
-    if (!result.isConfirmed) return;
-
-    try {
-      await api.delete(`/api/stock/${id}`);
-      await loadData();
-      await Swal.fire({ icon: "success", title: "Deleted", timer: 900, showConfirmButton: false });
-    } catch (err) {
-      console.error(err);
-      const message = err.response?.data?.message || "Error deleting stock entry.";
-      Swal.fire({ icon: "error", title: "Error", text: message });
-    }
   };
 
   const updateStatus = async (id, newStatus) => {
@@ -1264,13 +1384,33 @@ function StockDashboard() {
     });
     if (!result.isConfirmed) return;
 
+    await Promise.allSettled(
+      ids.map((id) => api.post(`/api/stock/${id}/update-status`, { status: newStatus }))
+    );
+
+    await loadData();
+    await Swal.fire({ icon: "success", title: "Bulk status updated", timer: 1100, showConfirmButton: false });
+  };
+
+  const deleteEntry = async (id) => {
+    const result = await Swal.fire({
+      title: "Delete stock entry?",
+      text: "This will permanently remove this stock entry.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel",
+    });
+    if (!result.isConfirmed) return;
+
     try {
-      await Promise.allSettled(ids.map((id) => api.post(`/api/stock/${id}/update-status`, { status: newStatus })));
+      await api.delete(`/api/stock/${id}`);
       await loadData();
-      await Swal.fire({ icon: "success", title: "Bulk status updated", timer: 1100, showConfirmButton: false });
-    } catch (e) {
-      console.error(e);
-      await Swal.fire({ icon: "error", title: "Error", text: "Bulk update failed." });
+      await Swal.fire({ icon: "success", title: "Deleted", timer: 900, showConfirmButton: false });
+    } catch (err) {
+      console.error(err);
+      const message = err.response?.data?.message || "Error deleting stock entry.";
+      Swal.fire({ icon: "error", title: "Error", text: message });
     }
   };
 
@@ -1291,291 +1431,258 @@ function StockDashboard() {
     });
     if (!result.isConfirmed) return;
 
-    try {
-      await Promise.allSettled(ids.map((id) => api.delete(`/api/stock/${id}`)));
-      await loadData();
-      await Swal.fire({ icon: "success", title: "Bulk deleted", timer: 1100, showConfirmButton: false });
-    } catch (e) {
-      console.error(e);
-      await Swal.fire({ icon: "error", title: "Error", text: "Bulk delete failed." });
-    }
+    await Promise.allSettled(ids.map((id) => api.delete(`/api/stock/${id}`)));
+    await loadData();
+    await Swal.fire({ icon: "success", title: "Bulk deleted", timer: 1100, showConfirmButton: false });
   };
 
-  const viewDetails = async (entry) => {
-    const qty = getEntryQty(entry);
-    const remaining = getEntryRemaining(entry);
-    const effectiveStatus = getEffectiveStatus(entry);
-    const isSaleEntryStock = effectiveStatus === "SOLD" || qty > remaining;
-
-    if (!isSaleEntryStock) {
-      setViewingEntry(entry);
-      return;
-    }
-
-    try {
-      const ledgerRes = await api.get("/api/ledger");
-      const all = Array.isArray(ledgerRes.data) ? ledgerRes.data : [];
-      const allSales = all.filter(isSaleEntry);
-
-      const entryTypeKey = normalizeProductKey(entry.productType);
-
-      const salesForProduct = allSales.filter((s) => {
-        const topKey = normalizeProductKey(s.productType || s.type || s.itemType || s.product || s.stockType);
-        if (topKey && entryTypeKey && topKey === entryTypeKey) return true;
-
-        const items =
-          (Array.isArray(s?.items) && s.items) ||
-          (Array.isArray(s?.products) && s.products) ||
-          (Array.isArray(s?.lineItems) && s.lineItems) ||
-          (Array.isArray(s?.details) && s.details) ||
-          null;
-
-        if (!items || !entryTypeKey) return false;
-
-        return items.some((it) => {
-          const itKey = normalizeProductKey(it?.productType ?? it?.type ?? it?.itemType ?? it?.product ?? it?.stockType);
-          return itKey && itKey === entryTypeKey;
-        });
-      });
-
-      const linked = salesForProduct.filter((s) => isSaleLinkedToEntry(s, entry));
-      const finalSales = linked.length > 0 ? linked : salesForProduct;
-
-      setViewingEntry({ ...entry, salesDetails: finalSales, salesLinked: linked.length > 0 });
-    } catch (err) {
-      console.error("Error fetching sales details:", err);
-      setViewingEntry(entry);
-    }
+  /* ----------------------------
+     Transfers (NEW FEATURE)
+     - Valid only on remaining NOW
+     - Source entry shows Purchased Qty as-is
+     - Side shows Transferred Out
+     - Product totals adjust: Remaining (type) decreases/increases
+  ----------------------------- */
+  const upsertTransfer = (t) => {
+    const next = [t, ...(transfers || [])];
+    setTransfers(next);
+    setTransfersLS(next);
   };
 
-  const closeDetails = () => setViewingEntry(null);
-
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const clearFilters = () => setFilters({ status: "", productType: "", supplierName: "" });
-
-  const costDetails = calculateTotalCost();
-
-  const uniqueProducts = useMemo(
-    () => [...new Set(entries.map((e) => e.productType).filter(Boolean))].sort(),
-    [entries]
-  );
-  const uniqueSuppliers = useMemo(
-    () => [...new Set(entries.map((e) => e.supplierName).filter(Boolean))].sort(),
-    [entries]
-  );
-
-  // ✅ ledger sold map first
-  const ledgerSoldByProduct = useMemo(() => {
-    if (!Array.isArray(ledgerSales) || ledgerSales.length === 0) return {};
-    return computeLedgerSoldByProduct(ledgerSales);
-  }, [ledgerSales]);
-
-  // ✅ localByProduct uses ledger fallback too
-  const localByProduct = useMemo(
-    () => computeByProductFromEntries(entries, ledgerSoldByProduct),
-    [entries, ledgerSoldByProduct]
-  );
-
-  // ✅ overall totals (prefer ledger sold)
-  const stockBasedSoldQtyOverall = useMemo(() => {
-    const allNeg = entries.filter((e) => getEntryQty(e) < 0);
-    if (allNeg.length > 0) return allNeg.reduce((s, e) => s + Math.abs(getEntryQty(e)), 0);
-
-    return entries.reduce((s, e) => {
-      const q = getEntryQty(e);
-      const r = getEntryRemaining(e);
-      const diff = q - r;
-      return s + (diff > 0 ? diff : 0);
-    }, 0);
-  }, [entries]);
-
-  const ledgerBasedSoldQtyOverall = useMemo(() => {
-    if (!Array.isArray(ledgerSales) || ledgerSales.length === 0) return 0;
-    return ledgerSales.reduce((sum, e) => sum + getLedgerSaleQty(e), 0);
-  }, [ledgerSales]);
-
-  const totalSoldQtyOverall = useMemo(
-    () => (ledgerBasedSoldQtyOverall > 0 ? ledgerBasedSoldQtyOverall : stockBasedSoldQtyOverall),
-    [ledgerBasedSoldQtyOverall, stockBasedSoldQtyOverall]
-  );
-
-  const totalPurchasedOverall = useMemo(() => {
-    return entries.reduce((sum, e) => {
-      const q = getEntryQty(e);
-      return q > 0 ? sum + q : sum;
-    }, 0);
-  }, [entries]);
-
-  // ✅ FIX: totalPurchasedValueOverall uses FULL effective cost (charges included)
-  const totalPurchasedValueOverall = useMemo(() => {
-    return entries.reduce((sum, e) => {
-      const q = getEntryQty(e);
-      if (q <= 0) return sum;
-      return sum + calcEntryCosts(e).totalCost;
-    }, 0);
-  }, [entries]);
-
-  const availableQtyOverall = useMemo(() => {
-    const purchased = safeNum(totalPurchasedOverall);
-    const sold = safeNum(totalSoldQtyOverall);
-    const diff = purchased - sold;
-    return diff > 0 ? diff : 0;
-  }, [totalPurchasedOverall, totalSoldQtyOverall]);
-
-  // ✅ Available value by avg effective unit cost
-  const availableValueOverall = useMemo(() => {
-    if (availableQtyOverall <= 0 || totalPurchasedOverall <= 0) return 0;
-    const avgUnitCost = totalPurchasedValueOverall / totalPurchasedOverall;
-    return avgUnitCost * availableQtyOverall;
-  }, [availableQtyOverall, totalPurchasedOverall, totalPurchasedValueOverall]);
-
-  // ✅ PRO: Low stock alerts by product
-  const lowStockProducts = useMemo(() => {
-    const threshold = safeNum(lowStockThreshold);
-    if (!localByProduct || threshold <= 0) return [];
-    return Object.entries(localByProduct)
-      .map(([product, data]) => ({ product, remaining: safeNum(data.remaining) }))
-      .filter((x) => x.remaining > 0 && x.remaining <= threshold)
-      .sort((a, b) => a.remaining - b.remaining);
-  }, [localByProduct, lowStockThreshold]);
-
-  // ✅ PRO: entries pipeline (search + sort)
-  const filteredEntries = useMemo(() => {
-    const text = (searchText || "").trim().toLowerCase();
-    const base = [...entries];
-
-    const searched =
-      text.length === 0
-        ? base
-        : base.filter((e) => {
-            const blob = [
-              e.productType,
-              e.supplierName,
-              e.supplierInvoiceNo,
-              e.transportCompany,
-              e.vehicleNumber,
-              e.warehouseLocation,
-              e.notes,
-              formatDate(e.purchaseDate),
-              e.status,
-            ]
-              .filter(Boolean)
-              .join(" ")
-              .toLowerCase();
-
-            return blob.includes(text);
-          });
-
-    const { key, dir } = sort || {};
-    const sign = dir === "asc" ? 1 : -1;
-
-    searched.sort((a, b) => {
-      if (key === "purchaseDate") {
-        const av = new Date(a.purchaseDate || 0).getTime();
-        const bv = new Date(b.purchaseDate || 0).getTime();
-        return (av - bv) * sign;
-      }
-      if (key === "productType") {
-        return String(a.productType || "").localeCompare(String(b.productType || "")) * sign;
-      }
-      if (key === "qty") {
-        return (getEntryQty(a) - getEntryQty(b)) * sign;
-      }
-      if (key === "remaining") {
-        return (getEntryRemaining(a) - getEntryRemaining(b)) * sign;
-      }
-      if (key === "totalCost") {
-        return (calcEntryCosts(a).totalCost - calcEntryCosts(b).totalCost) * sign;
-      }
-      return 0;
+  const removeTransfer = async (transferId) => {
+    const res = await Swal.fire({
+      title: "Undo Transfer?",
+      text: "This will remove the transfer record and restore quantities.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, undo",
+      cancelButtonText: "Cancel",
     });
+    if (!res.isConfirmed) return;
 
-    return searched;
-  }, [entries, searchText, sort]);
-
-  const toggleSort = (key) => {
-    setSort((prev) => {
-      if (!prev || prev.key !== key) return { key, dir: "asc" };
-      return { key, dir: prev.dir === "asc" ? "desc" : "asc" };
-    });
+    const next = (transfers || []).filter((x) => String(x?.id) !== String(transferId));
+    setTransfers(next);
+    setTransfersLS(next);
+    await Swal.fire({ icon: "success", title: "Transfer removed", timer: 900, showConfirmButton: false });
   };
 
-  const toggleSelect = (id) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      const s = String(id);
-      if (next.has(s)) next.delete(s);
-      else next.add(s);
-      return next;
-    });
-  };
-
-  const selectAllVisible = () => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      const ids = filteredEntries.map((e) => String(e._id));
-      const allSelected = ids.every((id) => next.has(id));
-      if (allSelected) {
-        ids.forEach((id) => next.delete(id));
-      } else {
-        ids.forEach((id) => next.add(id));
-      }
-      return next;
-    });
-  };
-
-  const exportDashboardPDF = () => {
-    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
-
-    const now = new Date();
-    const stamp = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
-
-    doc.setFontSize(16);
-    doc.text("Stock Management Dashboard Summary", 40, 40);
-    doc.setFontSize(10);
-    doc.text(`Generated: ${stamp}`, 40, 58);
-
-    const topRows = [
-      ["TOTAL STOCK (Purchased Qty)", Number(totalPurchasedOverall || 0).toLocaleString()],
-      ["TOTAL PURCHASE VALUE", `₨ ${Number(totalPurchasedValueOverall || 0).toLocaleString()}`],
-      ["TOTAL SOLD QTY", Number(totalSoldQtyOverall || 0).toLocaleString()],
-      ["AVAILABLE QTY", Number(availableQtyOverall || 0).toLocaleString()],
-      ["AVAILABLE VALUE (avg cost)", `₨ ${Number(availableValueOverall || 0).toLocaleString()}`],
+  const exportTransfersCSV = () => {
+    const rows = [
+      ["Transfer Date", "From Entry Date", "From Product", "To Product", "Qty", "Unit Cost", "Value", "Note"],
     ];
 
-    autoTable(doc, {
-      startY: 80,
-      head: [["Metric", "Value"]],
-      body: topRows,
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [31, 59, 122] },
+    (transfers || []).forEach((t) => {
+      rows.push([
+        t.transferDate || formatDate(t.createdAt) || "",
+        t.fromPurchaseDate || "",
+        t.fromProductType || "",
+        t.toProductType || "",
+        Number(t.qty || 0).toLocaleString(),
+        Number(t.unitCost || 0).toFixed(4),
+        `₨ ${Number((safeNum(t.qty) * safeNum(t.unitCost)) || 0).toLocaleString()}`,
+        t.note || "",
+      ]);
     });
 
-    const byProdRows = Object.entries(localByProduct || {}).map(([product, d]) => [
-      product,
-      Number(d.totalPurchased || 0).toLocaleString(),
-      Number(d.remaining || 0).toLocaleString(),
-      Number(d.sold || 0).toLocaleString(),
-      `₨ ${Number(d.purchaseValue || 0).toLocaleString()}`,
-      `₨ ${Number(d.remainingValue || 0).toLocaleString()}`,
-    ]);
-
-    autoTable(doc, {
-      startY: doc.lastAutoTable.finalY + 18,
-      head: [["Product", "Purchased", "Remaining", "Sold", "Purchase Value", "Remaining Value"]],
-      body: byProdRows,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [47, 85, 151] },
-      theme: "grid",
-    });
-
-    doc.save(`Stock_Dashboard_Summary_${formatDate(new Date())}.pdf`);
+    downloadCSV(`Stock_Transfers_${formatDate(new Date())}.csv`, rows);
   };
 
+  const openTransferWizard = async ({ fromEntry = null } = {}) => {
+    const sorted = [...entries].sort((a, b) => new Date(b.purchaseDate || 0) - new Date(a.purchaseDate || 0));
+
+    const optionsHtml = sorted
+      .map((e) => {
+        const remNow = getEntryRemainingNow(e);
+        const label = `${formatDate(e.purchaseDate)} • ${e.productType || "-"} • RemNow: ${Number(remNow || 0).toLocaleString()} • Supplier: ${e.supplierName || "-"}`;
+        const disabled = remNow <= 0 ? "disabled" : "";
+        const selected = fromEntry && String(fromEntry._id) === String(e._id) ? "selected" : "";
+        return `<option value="${escapeHtml(e._id)}" ${disabled} ${selected}>${escapeHtml(label)}</option>`;
+      })
+      .join("");
+
+    const productsDatalist = [
+      ...new Set([
+        ...uniqueProducts.filter(Boolean),
+        ...Object.keys(localByProduct || {}),
+        ...(transfers || []).map((t) => t?.toProductType).filter(Boolean),
+      ]),
+    ]
+      .sort((a, b) => String(a).localeCompare(String(b)))
+      .map((p) => `<option value="${escapeHtml(p)}"></option>`)
+      .join("");
+
+    const html = `
+      <div style="text-align:left; display:flex; flex-direction:column; gap:10px;">
+        <div style="padding:10px 12px; border-radius:14px; border:1px solid rgba(20,33,61,.10);
+          background: linear-gradient(135deg, rgba(31,75,255,.08), rgba(0,178,255,.06));">
+          <div style="font-weight:1000; font-size:12px; color:#0b1220;">Transfer Qty (Between Stock Types)</div>
+          <div style="font-size:10.5px; color:#58657a; font-weight:800; margin-top:3px;">
+            ✅ Valid only on <b>Remaining Now</b> of the selected entry. Source Purchased Qty stays same — we only show Transfer Out separately.
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <div style="grid-column:1/-1; display:flex; flex-direction:column; gap:6px;">
+            <div style="font-weight:900; font-size:11px; color:#0b1220;">From Stock Entry *</div>
+            <select id="tr-from"
+              style="padding:10px 11px; border-radius:12px; border:1px solid rgba(20,33,61,.15); outline:none; font-size:12px; font-weight:900; background:#fff;">
+              <option value="">Select an entry...</option>
+              ${optionsHtml}
+            </select>
+            <div style="margin-top:6px;">
+              <span id="tr-available-badge"
+                style="display:inline-block; padding:6px 10px; border-radius:999px; background:#dcfce7; color:#14532d; font-weight:1000; font-size:10px; border:1px solid rgba(20,33,61,.08);">
+                Available: 0
+              </span>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="font-weight:900; font-size:11px; color:#0b1220;">To Product Type *</div>
+            <input id="tr-to" placeholder="e.g. Sheet / Coil"
+              list="tr-products"
+              style="padding:10px 11px; border-radius:12px; border:1px solid rgba(20,33,61,.15); outline:none; font-size:12px; font-weight:800; background:#fff;" />
+            <datalist id="tr-products">${productsDatalist}</datalist>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="font-weight:900; font-size:11px; color:#0b1220;">Transfer Qty *</div>
+            <input id="tr-qty" type="number" step="0.01" min="0"
+              placeholder="0"
+              style="padding:10px 11px; border-radius:12px; border:1px solid rgba(20,33,61,.15); outline:none; font-size:12px; font-weight:900; background:#fff;" />
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="font-weight:900; font-size:11px; color:#0b1220;">Transfer Date</div>
+            <input id="tr-date" type="date" value="${formatDate(new Date())}"
+              style="padding:10px 11px; border-radius:12px; border:1px solid rgba(20,33,61,.15); outline:none; font-size:12px; font-weight:900; background:#fff;" />
+          </div>
+
+          <div style="grid-column:1/-1; display:flex; flex-direction:column; gap:6px;">
+            <div style="font-weight:900; font-size:11px; color:#0b1220;">Note</div>
+            <input id="tr-note" placeholder="Optional (e.g. Coil converted to Sheet)"
+              style="padding:10px 11px; border-radius:12px; border:1px solid rgba(20,33,61,.15); outline:none; font-size:12px; font-weight:800; background:#fff;" />
+          </div>
+        </div>
+      </div>
+    `;
+
+    const res = await Swal.fire({
+      title: "🔁 Transfer Stock Qty",
+      html,
+      width: 980,
+      showCancelButton: true,
+      confirmButtonText: "Transfer",
+      cancelButtonText: "Cancel",
+      focusConfirm: false,
+      didOpen: () => {
+        const fromSel = document.getElementById("tr-from");
+        const qtyInp = document.getElementById("tr-qty");
+        const badge = document.getElementById("tr-available-badge");
+
+        const getAvail = () => {
+          const id = fromSel?.value;
+          if (!id) return 0;
+          const e = entries.find((x) => String(x._id) === String(id));
+          if (!e) return 0;
+          return getEntryRemainingNow(e);
+        };
+
+        const updateBadge = () => {
+          const avail = getAvail();
+          if (badge) badge.textContent = `Available: ${Number(avail || 0).toLocaleString()}`;
+          if (qtyInp) qtyInp.max = String(avail || 0);
+        };
+
+        if (fromSel) fromSel.addEventListener("change", updateBadge);
+        updateBadge();
+      },
+      preConfirm: () => {
+        const fromId = document.getElementById("tr-from")?.value || "";
+        const toType = String(document.getElementById("tr-to")?.value || "").trim();
+        const qty = safeNum(document.getElementById("tr-qty")?.value || 0);
+        const tDate = document.getElementById("tr-date")?.value || formatDate(new Date());
+        const note = String(document.getElementById("tr-note")?.value || "").trim();
+
+        if (!fromId) {
+          Swal.showValidationMessage("Please select a source stock entry.");
+          return false;
+        }
+        const src = entries.find((x) => String(x._id) === String(fromId));
+        if (!src) {
+          Swal.showValidationMessage("Selected entry not found. Refresh and try again.");
+          return false;
+        }
+
+        if (!toType) {
+          Swal.showValidationMessage("Please enter/select To Product Type.");
+          return false;
+        }
+
+        const fromType = String(src.productType || "").trim();
+        if (normalizeProductKey(fromType) === normalizeProductKey(toType)) {
+          Swal.showValidationMessage("To Product Type must be different from From Product Type.");
+          return false;
+        }
+
+        const avail = getEntryRemainingNow(src);
+        if (qty <= 0) {
+          Swal.showValidationMessage("Transfer quantity must be greater than 0.");
+          return false;
+        }
+        if (qty > avail) {
+          Swal.showValidationMessage(`Transfer qty cannot exceed Remaining Now (${Number(avail).toLocaleString()}).`);
+          return false;
+        }
+
+        return {
+          fromId,
+          fromType,
+          toType,
+          qty,
+          tDate,
+          note,
+        };
+      },
+    });
+
+    if (!res.isConfirmed) return;
+
+    const v = res.value;
+    const src = entries.find((x) => String(x._id) === String(v.fromId));
+    if (!src) return;
+
+    const unitCost = safeNum(calcEntryCosts(src).effectiveRate); // carries correct charges value
+    const record = {
+      id: uid(),
+      createdAt: new Date().toISOString(),
+      transferDate: v.tDate,
+      fromEntryId: String(src._id),
+      fromPurchaseDate: formatDate(src.purchaseDate),
+      fromProductType: String(src.productType || "").trim(),
+      toProductType: String(v.toType || "").trim(),
+      qty: safeNum(v.qty),
+      unitCost,
+      note: String(v.note || "").trim(),
+    };
+
+    upsertTransfer(record);
+
+    await Swal.fire({
+      icon: "success",
+      title: "Transferred",
+      html: `<div style="text-align:left; font-weight:900;">
+              ✅ <b>${record.qty}</b> moved from <b>${escapeHtml(record.fromProductType)}</b> to <b>${escapeHtml(record.toProductType)}</b><br/>
+              <div style="margin-top:6px; font-size:12px; color:#58657a; font-weight:800;">
+                Source entry keeps purchased qty same. We show Transfer Out separately and update Remaining Now.
+              </div>
+            </div>`,
+    });
+  };
+
+  /* ----------------------------
+     Exports
+  ----------------------------- */
   const exportEntriesCSV = () => {
     const rows = [
       [
@@ -1583,8 +1690,9 @@ function StockDashboard() {
         "Product",
         "Supplier",
         "Status",
-        "Qty",
-        "Remaining",
+        "Qty (Purchased)",
+        "Remaining (Now)",
+        "Transferred Out",
         "Purchase Rate",
         "Total Charges",
         "Total Cost",
@@ -1599,9 +1707,10 @@ function StockDashboard() {
 
     filteredEntries.forEach((e) => {
       const qty = getEntryQty(e);
-      const rem = getEntryRemaining(e);
       const st = getEffectiveStatus(e);
       const costs = calcEntryCosts(e);
+      const tOut = getTransferredOutForEntry(e._id);
+      const remNow = getEntryRemainingNow(e);
 
       rows.push([
         formatDate(e.purchaseDate),
@@ -1609,7 +1718,8 @@ function StockDashboard() {
         e.supplierName || "",
         st,
         qty,
-        rem,
+        remNow,
+        tOut,
         safeNum(e.purchaseRate),
         costs.totalCharges,
         costs.totalCost,
@@ -1625,715 +1735,1187 @@ function StockDashboard() {
     downloadCSV(`Stock_Entries_${formatDate(new Date())}.csv`, rows);
   };
 
-  const handleFilterChip = async () => {
+  const exportDashboardPDF = () => {
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+
+    const now = new Date();
+    const stamp = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+
+    doc.setFontSize(16);
+    doc.text(`${companyName} — Stock Dashboard Summary`, 40, 40);
+    doc.setFontSize(10);
+    doc.text(`Generated: ${stamp}`, 40, 58);
+    doc.text(`Note: Product Remaining includes Transfers (In/Out)`, 40, 74);
+
+    const topRows = [
+      ["TOTAL STOCK (Purchased Qty)", Number(totalPurchasedOverall || 0).toLocaleString()],
+      ["TOTAL PURCHASE VALUE (Charges Included)", `₨ ${Number(totalPurchasedValueOverall || 0).toLocaleString()}`],
+      ["TOTAL SOLD QTY", Number(totalSoldQtyOverall || 0).toLocaleString()],
+      ["AVAILABLE QTY (Overall)", Number(availableQtyOverall || 0).toLocaleString()],
+      ["AVAILABLE VALUE (Avg Cost)", `₨ ${Number(availableValueOverall || 0).toLocaleString()}`],
+    ];
+
+    autoTable(doc, {
+      startY: 90,
+      head: [["Metric", "Value"]],
+      body: topRows,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [31, 75, 255] },
+    });
+
+    const byProdRows = Object.entries(localByProduct || {}).map(([product, d]) => [
+      product,
+      Number(d.totalPurchased || 0).toLocaleString(),
+      Number(d.remaining || 0).toLocaleString(),
+      Number(d.sold || 0).toLocaleString(),
+      `₨ ${Number(d.purchaseValue || 0).toLocaleString()}`,
+      `₨ ${Number(d.remainingValue || 0).toLocaleString()}`,
+      Number(d.transferOut || 0).toLocaleString(),
+      Number(d.transferIn || 0).toLocaleString(),
+    ]);
+
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 18,
+      head: [["Product", "Purchased", "Remaining", "Sold", "Purchase Value", "Remaining Value", "Transfer Out", "Transfer In"]],
+      body: byProdRows,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [0, 178, 255] },
+      theme: "grid",
+    });
+
+    doc.save(`Stock_Dashboard_${formatDate(new Date())}.pdf`);
+  };
+
+  /* ----------------------------
+     Saved Views (NEW FEATURE)
+  ----------------------------- */
+  const getViews = () => {
+    try {
+      const raw = localStorage.getItem(LS_VIEWS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const saveView = async () => {
+    const res = await Swal.fire({
+      title: "Save this View",
+      input: "text",
+      inputPlaceholder: "e.g. Supplier A + Available",
+      showCancelButton: true,
+      confirmButtonText: "Save",
+    });
+    if (!res.isConfirmed) return;
+
+    const name = String(res.value || "").trim();
+    if (!name) return;
+
+    const views = getViews();
+    const next = [
+      ...views.filter((v) => v.name !== name),
+      {
+        name,
+        filters,
+        searchText,
+        sort,
+        lowStockThreshold,
+      },
+    ];
+    localStorage.setItem(LS_VIEWS_KEY, JSON.stringify(next));
+
+    Swal.fire({ icon: "success", title: "Saved", timer: 900, showConfirmButton: false });
+  };
+
+  const loadView = async () => {
+    const views = getViews();
+    if (!views.length) {
+      await Swal.fire({ icon: "info", title: "No saved views", text: "Save a view first." });
+      return;
+    }
+
+    const html = `
+      <div style="text-align:left; display:flex; flex-direction:column; gap:8px;">
+        ${views
+          .map(
+            (v) => `
+          <button data-name="${String(v.name).replace(/"/g, "&quot;")}"
+            style="text-align:left; padding:10px 12px; border-radius:12px; border:1px solid rgba(20,33,61,.12);
+              background:#fff; cursor:pointer; font-weight:900;">
+            ${v.name}
+            <div style="font-size:10.5px; color:#58657a; font-weight:800; margin-top:3px;">
+              status: ${v.filters?.status || "all"} • product: ${v.filters?.productType || "all"} • supplier: ${
+              v.filters?.supplierName || "all"
+            }
+            </div>
+          </button>
+        `
+          )
+          .join("")}
+      </div>
+    `;
+
     await Swal.fire({
-      icon: "info",
-      title: "Pro Tip",
-      text: "Use Search + Sort + Bulk actions to manage stock like an enterprise dashboard.",
+      title: "Load View",
+      html,
+      showCancelButton: true,
+      confirmButtonText: "Close",
+      didOpen: () => {
+        document.querySelectorAll("button[data-name]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const name = btn.getAttribute("data-name");
+            const found = views.find((x) => x.name === name);
+            if (!found) return;
+
+            setFilters(found.filters || { status: "", productType: "", supplierName: "" });
+            setSearchText(found.searchText || "");
+            setSort(found.sort || { key: "purchaseDate", dir: "desc" });
+            setLowStockThreshold(Number(found.lowStockThreshold || 5));
+            Swal.close();
+          });
+        });
+      },
     });
   };
 
+  const clearFilters = () => setFilters({ status: "", productType: "", supplierName: "" });
+
+  /* ----------------------------
+     View Details (kept)
+  ----------------------------- */
+  const viewDetails = async (entry) => {
+    const qty = getEntryQty(entry);
+    const remainingBase = getEntryRemaining(entry); // sales-based remaining (backend/computed)
+    const effectiveStatus = getEffectiveStatus(entry);
+    const isSaleEntryStock = effectiveStatus === "SOLD" || qty > remainingBase;
+
+    if (!isSaleEntryStock) {
+      setViewingEntry(entry);
+      return;
+    }
+
+    try {
+      const ledgerRes = await api.get("/api/ledger");
+      const all = Array.isArray(ledgerRes.data) ? ledgerRes.data : [];
+      const allSales = all.filter(isSaleEntry);
+
+      const entryTypeKey = normalizeProductKey(entry.productType);
+
+      const salesForProduct = allSales.filter((s) => {
+        const topKey = normalizeProductKey(
+          s.productType || s.type || s.itemType || s.product || s.stockType
+        );
+        if (topKey && entryTypeKey && topKey === entryTypeKey) return true;
+
+        const items =
+          (Array.isArray(s?.items) && s.items) ||
+          (Array.isArray(s?.products) && s.products) ||
+          (Array.isArray(s?.lineItems) && s.lineItems) ||
+          (Array.isArray(s?.details) && s.details) ||
+          null;
+
+        if (!items || !entryTypeKey) return false;
+
+        return items.some((it) => {
+          const itKey = normalizeProductKey(
+            it?.productType ??
+              it?.type ??
+              it?.itemType ??
+              it?.product ??
+              it?.stockType
+          );
+          return itKey && itKey === entryTypeKey;
+        });
+      });
+
+      const linked = salesForProduct.filter((s) => isSaleLinkedToEntry(s, entry));
+      const finalSales = linked.length > 0 ? linked : salesForProduct;
+
+      setViewingEntry({
+        ...entry,
+        salesDetails: finalSales,
+        salesLinked: linked.length > 0,
+      });
+    } catch (err) {
+      console.error("Error fetching sales details:", err);
+      setViewingEntry(entry);
+    }
+  };
+
+  const closeDetails = () => setViewingEntry(null);
+
+  /* ----------------------------
+     NEW: SweetAlert Add/Edit Wizard
+  ----------------------------- */
+  const openStockWizard = async ({
+    mode = "create", // create | edit
+    entry = null,
+    prefill = null,
+  } = {}) => {
+    const base = entry ? { ...entry } : {};
+    const initial = {
+      productType: prefill?.productType ?? base.productType ?? "",
+      status: prefill?.status ?? base.status ?? "BOOKED",
+      purchaseDate: prefill?.purchaseDate ?? formatDate(base.purchaseDate) ?? formatDate(new Date()),
+      quantity: prefill?.quantity ?? (base.quantity ?? ""),
+      purchaseRate: prefill?.purchaseRate ?? (base.purchaseRate ?? ""),
+      supplierName: prefill?.supplierName ?? base.supplierName ?? "",
+      supplierInvoiceNo: prefill?.supplierInvoiceNo ?? base.supplierInvoiceNo ?? "",
+
+      loadingCharges: prefill?.loadingCharges ?? (base.loadingCharges ?? ""),
+      unloadingCharges: prefill?.unloadingCharges ?? (base.unloadingCharges ?? ""),
+      transportCharges: prefill?.transportCharges ?? (base.transportCharges ?? ""),
+      otherCharges: prefill?.otherCharges ?? (base.otherCharges ?? ""),
+      otherChargesDescription: prefill?.otherChargesDescription ?? base.otherChargesDescription ?? "",
+
+      transportCompany: prefill?.transportCompany ?? base.transportCompany ?? "",
+      vehicleNumber: prefill?.vehicleNumber ?? base.vehicleNumber ?? "",
+      warehouseLocation: prefill?.warehouseLocation ?? base.warehouseLocation ?? "",
+      expectedArrivalDate: prefill?.expectedArrivalDate ?? formatDate(base.expectedArrivalDate) ?? "",
+      notes: prefill?.notes ?? base.notes ?? "",
+    };
+
+    const steps = ["Basics", "Charges", "Logistics"];
+    let data = { ...initial };
+
+    const swal = Swal.mixin({
+      customClass: {
+        popup: "swal2-border-radius",
+        confirmButton: "swal2-confirm",
+      },
+      confirmButtonText: "Next →",
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+      width: 980,
+    });
+
+    const getVal = (k) => {
+      const el = document.getElementById(k);
+      return el ? el.value : data[k];
+    };
+
+    for (let step = 0; step < steps.length; step++) {
+      const isLast = step === steps.length - 1;
+
+      const html = buildWizardHTML(step, data, {
+        products: uniqueProducts,
+        suppliers: uniqueSuppliers,
+      });
+
+      const res = await swal.fire({
+        title:
+          mode === "edit"
+            ? `Edit Stock Entry — ${steps[step]}`
+            : `New Stock Entry — ${steps[step]}`,
+        html,
+        confirmButtonText: isLast ? (mode === "edit" ? "Save Changes" : "Save Entry") : "Next →",
+        showDenyButton: isLast && mode === "create",
+        denyButtonText: "Save & Add Another",
+        focusConfirm: false,
+        didOpen: () => {
+          bindCostPreview(getVal);
+        },
+        preConfirm: () => {
+          const stepKeys =
+            step === 0
+              ? [
+                  "productType",
+                  "status",
+                  "purchaseDate",
+                  "quantity",
+                  "purchaseRate",
+                  "supplierName",
+                  "supplierInvoiceNo",
+                ]
+              : step === 1
+              ? [
+                  "loadingCharges",
+                  "unloadingCharges",
+                  "transportCharges",
+                  "otherCharges",
+                  "otherChargesDescription",
+                ]
+              : [
+                  "transportCompany",
+                  "vehicleNumber",
+                  "warehouseLocation",
+                  "expectedArrivalDate",
+                  "notes",
+                ];
+
+          const values = readWizardValues(stepKeys);
+          data = { ...data, ...values };
+
+          if (step === 0) {
+            const qty = safeNum(values.quantity);
+            const rate = safeNum(values.purchaseRate);
+            if (
+              !String(values.productType || "").trim() ||
+              !String(values.purchaseDate || "").trim() ||
+              qty <= 0 ||
+              rate < 0
+            ) {
+              Swal.showValidationMessage("Please fill Product, Purchase Date, valid Quantity and Rate.");
+              return false;
+            }
+          }
+
+          if (step === 1) {
+            const neg =
+              safeNum(values.loadingCharges) < 0 ||
+              safeNum(values.unloadingCharges) < 0 ||
+              safeNum(values.transportCharges) < 0 ||
+              safeNum(values.otherCharges) < 0;
+            if (neg) {
+              Swal.showValidationMessage("Charges cannot be negative.");
+              return false;
+            }
+          }
+
+          return true;
+        },
+      });
+
+      if (!res.isConfirmed && !res.isDenied) {
+        return; // cancelled
+      }
+
+      if (isLast) {
+        const payload = {
+          productType: String(data.productType || "").trim(),
+          status: String(data.status || "BOOKED").toUpperCase(),
+          purchaseDate: data.purchaseDate,
+          quantity: safeNum(data.quantity),
+          purchaseRate: safeNum(data.purchaseRate),
+          supplierName: String(data.supplierName || "").trim(),
+          supplierInvoiceNo: String(data.supplierInvoiceNo || "").trim(),
+
+          transportCompany: String(data.transportCompany || "").trim(),
+          vehicleNumber: String(data.vehicleNumber || "").trim(),
+          warehouseLocation: String(data.warehouseLocation || "").trim(),
+
+          loadingCharges: safeNum(data.loadingCharges),
+          unloadingCharges: safeNum(data.unloadingCharges),
+          transportCharges: safeNum(data.transportCharges),
+          otherCharges: safeNum(data.otherCharges),
+          otherChargesDescription: String(data.otherChargesDescription || "").trim(),
+
+          expectedArrivalDate: data.expectedArrivalDate || "",
+          notes: String(data.notes || "").trim(),
+        };
+
+        const costs = calcEntryCosts(payload);
+
+        try {
+          Swal.fire({
+            title: mode === "edit" ? "Saving Changes..." : "Saving Entry...",
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+          });
+
+          if (mode === "edit" && entry?._id) {
+            await api.put(`/api/stock/${entry._id}`, {
+              ...payload,
+              totalCost: costs.totalCost,
+              effectiveRate: costs.effectiveRate,
+            });
+          } else {
+            await api.post("/api/stock", {
+              ...payload,
+              totalCost: costs.totalCost,
+              effectiveRate: costs.effectiveRate,
+            });
+          }
+
+          await loadData();
+
+          Swal.close();
+          await Swal.fire({
+            icon: "success",
+            title: mode === "edit" ? "Updated" : "Saved",
+            text: mode === "edit" ? "Stock entry updated successfully." : "Stock entry saved successfully.",
+            timer: 1200,
+            showConfirmButton: false,
+          });
+
+          if (res.isDenied && mode === "create") {
+            openStockWizard({
+              mode: "create",
+              prefill: {
+                productType: payload.productType,
+                supplierName: payload.supplierName,
+                status: payload.status,
+                purchaseDate: formatDate(new Date()),
+              },
+            });
+          }
+        } catch (err) {
+          console.error(err);
+          const msg = err.response?.data?.message || "Error saving stock entry.";
+          await Swal.fire({ icon: "error", title: "Error", text: msg });
+        }
+
+        return;
+      }
+    }
+  };
+
+  const cloneEntry = (e) => {
+    const costs = calcEntryCosts(e);
+    openStockWizard({
+      mode: "create",
+      prefill: {
+        productType: e.productType || "",
+        status: (e.status || "BOOKED").toUpperCase(),
+        purchaseDate: formatDate(new Date()),
+        supplierName: e.supplierName || "",
+        supplierInvoiceNo: e.supplierInvoiceNo || "",
+        purchaseRate: e.purchaseRate ?? "",
+        quantity: "",
+        loadingCharges: e.loadingCharges ?? "",
+        unloadingCharges: e.unloadingCharges ?? "",
+        transportCharges: e.transportCharges ?? "",
+        otherCharges: e.otherCharges ?? "",
+        otherChargesDescription: e.otherChargesDescription || "",
+        transportCompany: e.transportCompany || "",
+        vehicleNumber: e.vehicleNumber || "",
+        warehouseLocation: e.warehouseLocation || "",
+        expectedArrivalDate: "",
+        notes: e.notes
+          ? `Cloned from ${formatDate(e.purchaseDate)} — ${e.notes}`
+          : `Cloned from ${formatDate(e.purchaseDate)}`,
+        _previewTotal: costs.totalCost,
+      },
+    });
+  };
+
+  /* ----------------------------
+     Filters/Sort
+  ----------------------------- */
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((p) => ({ ...p, [name]: value }));
+  };
+
+  const toggleSort = (key) => {
+    setSort((prev) => {
+      if (!prev || prev.key !== key) return { key, dir: "asc" };
+      return { key, dir: prev.dir === "asc" ? "desc" : "asc" };
+    });
+  };
+
+  /* ----------------------------
+     Tips
+  ----------------------------- */
+  const showTips = async () => {
+    await Swal.fire({
+      icon: "info",
+      title: "Pro Tips",
+      html: `
+        <div style="text-align:left; font-weight:800; color:#24324a;">
+          ✅ Use <b>Saved Views</b> for daily operations.<br/>
+          ✅ Use <b>Search</b> to filter by invoice, vehicle, warehouse, notes.<br/>
+          ✅ Use <b>Bulk Bar</b> to update statuses faster.<br/>
+          ✅ Your <b>Total Cost</b> includes charges and effective/unit is auto-calculated.<br/>
+          ✅ Use <b>Transfer Qty</b> to move remaining stock from one type to another (no backend change).
+        </div>
+      `,
+    });
+  };
+
+  /* ----------------------------
+     UI
+  ----------------------------- */
   return (
     <div style={styles.page}>
-      <div style={styles.container}>
-        {/* Header */}
-        <div style={styles.headerBar}>
-          <div style={styles.titleWrap}>
-            <div style={styles.titleBadge}>S</div>
+      <div style={styles.shell}>
+        {/* Company Header */}
+        <div style={styles.brandHeader}>
+          <div style={styles.brandLeft}>
+            <div style={styles.logo}>AS</div>
             <div>
-              <div style={styles.titleStyle}>Stock Management Dashboard</div>
-              <div style={styles.subTitle}>
-                Enterprise View • Charges Included • Exports • Bulk Actions • Alerts
+              <div style={styles.brandTitle}>{companyName} — Stock Center</div>
+              <div style={styles.brandSub}>
+                Premium Dashboard • Charges Included • Smart Search • Saved Views • Bulk Actions • Transfers
               </div>
             </div>
           </div>
 
-          <div style={styles.headerActions}>
-            <button style={styles.btnGhost} onClick={handleFilterChip}>
-              ✨ Tips
-            </button>
+          <div style={styles.topActions}>
+            <button style={styles.btn} onClick={showTips}>✨ Tips</button>
+            <button style={styles.btn} onClick={saveView}>💾 Save View</button>
+            <button style={styles.btn} onClick={loadView}>📌 Load View</button>
+            <button style={styles.btn} onClick={() => navigate("/")}>← Ledger</button>
+            <button style={styles.btn} onClick={() => navigate("/available-stock")}>✅ Available Stock</button>
 
-            <button style={styles.btnGhost} onClick={() => navigate("/")}>
-              ← Ledger
-            </button>
+            {/* ✅ NEW: Transfer button */}
+            <button style={styles.btn} onClick={() => openTransferWizard()}>🔁 Transfer Qty</button>
 
-            <button style={styles.btn} onClick={() => navigate("/available-stock")}>
-              ✅ Available Stock
-            </button>
-
-            <button style={styles.btnGhost} onClick={exportEntriesCSV}>
-              ⬇️ Export CSV
-            </button>
-
-            <button style={styles.btn} onClick={exportDashboardPDF}>
-              🧾 Download PDF Summary
+            <button style={styles.btn} onClick={exportTransfersCSV}>📤 Transfers CSV</button>
+            <button style={styles.btn} onClick={exportEntriesCSV}>⬇️ Export CSV</button>
+            <button style={styles.btn} onClick={exportDashboardPDF}>🧾 PDF Summary</button>
+            <button style={styles.btnPrimary} onClick={() => openStockWizard({ mode: "create" })}>
+              ➕ New Stock Entry
             </button>
           </div>
         </div>
 
-        {loading && <p style={styles.sectionHint}>Loading...</p>}
-        {error && <p style={{ color: "red", fontWeight: 800 }}>{error}</p>}
-
-        {/* Top Tools */}
-        <div style={styles.topToolsRow}>
-          <div style={styles.toolCard}>
-            <h4 style={styles.toolTitle}>🔎 Smart Search + Sorting</h4>
-            <div style={styles.toolHint}>Search anything: product, supplier, invoice, vehicle, warehouse, notes...</div>
-
-            <div style={styles.inputRow}>
-              <input
-                style={styles.input}
-                placeholder="Search in entries..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-              <select
-                style={styles.select}
-                value={sort.key}
-                onChange={(e) => setSort((p) => ({ ...p, key: e.target.value }))}
-              >
-                <option value="purchaseDate">Sort: Date</option>
-                <option value="productType">Sort: Product</option>
-                <option value="qty">Sort: Qty</option>
-                <option value="remaining">Sort: Remaining</option>
-                <option value="totalCost">Sort: Total Cost</option>
-              </select>
-              <select
-                style={styles.select}
-                value={sort.dir}
-                onChange={(e) => setSort((p) => ({ ...p, dir: e.target.value }))}
-              >
-                <option value="asc">Asc</option>
-                <option value="desc">Desc</option>
-              </select>
-            </div>
+        {loading && (
+          <div style={{ ...styles.panel, padding: 14 }}>
+            <div style={{ fontWeight: 900, color: ui.sub }}>Loading stock dashboard...</div>
           </div>
+        )}
+        {error && (
+          <div style={{ ...styles.panel, padding: 14 }}>
+            <div style={{ fontWeight: 1000, color: ui.danger }}>{error}</div>
+          </div>
+        )}
 
-          <div style={styles.toolCard}>
-            <h4 style={styles.toolTitle}>🚨 Low Stock Alerts</h4>
-            <div style={styles.toolHint}>Set threshold and instantly see products running low.</div>
-
-            <div style={styles.inputRow}>
-              <input
-                style={styles.input}
-                type="number"
-                min="0"
-                step="0.01"
-                value={lowStockThreshold}
-                onChange={(e) => setLowStockThreshold(Number(e.target.value) || 0)}
-                placeholder="Threshold"
-              />
-              <div style={styles.pill}>
-                Alert Items: <span style={{ color: "#842029" }}>{lowStockProducts.length}</span>
+        {/* Tools Row */}
+        <div style={styles.toolRow}>
+          <div style={styles.panel}>
+            <div style={styles.panelHead}>
+              <div>
+                <h3 style={styles.panelTitle}>Smart Search & Sorting</h3>
+                <div style={styles.panelHint}>Search by product, supplier, invoice, vehicle, warehouse, notes...</div>
               </div>
-              <button
-                style={styles.btnGhost}
-                onClick={() =>
-                  Swal.fire({
-                    icon: lowStockProducts.length ? "warning" : "success",
-                    title: "Low Stock Alerts",
-                    html:
-                      lowStockProducts.length === 0
-                        ? "No products under threshold."
-                        : `<div style="text-align:left">
-                            ${lowStockProducts
-                              .slice(0, 10)
-                              .map((x) => `<div><b>${x.product}</b> — Remaining: ${x.remaining}</div>`)
-                              .join("")}
-                           </div>`,
-                  })
-                }
-              >
-                View Alerts
-              </button>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button
+                  style={styles.btn}
+                  onClick={() => {
+                    setSearchText("");
+                    setSort({ key: "purchaseDate", dir: "desc" });
+                  }}
+                >
+                  ♻️ Reset
+                </button>
+              </div>
+            </div>
+            <div style={styles.panelBody}>
+              <div style={styles.miniRow}>
+                <input
+                  style={styles.input}
+                  placeholder="Search..."
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                />
+                <select
+                  style={styles.select}
+                  value={sort.key}
+                  onChange={(e) => setSort((p) => ({ ...p, key: e.target.value }))}
+                >
+                  <option value="purchaseDate">Sort: Date</option>
+                  <option value="productType">Sort: Product</option>
+                  <option value="qty">Sort: Qty</option>
+                  <option value="remaining">Sort: Remaining (Now)</option>
+                  <option value="totalCost">Sort: Total Cost</option>
+                </select>
+                <select
+                  style={styles.select}
+                  value={sort.dir}
+                  onChange={(e) => setSort((p) => ({ ...p, dir: e.target.value }))}
+                >
+                  <option value="asc">Asc</option>
+                  <option value="desc">Desc</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div style={styles.panel}>
+            <div style={styles.panelHead}>
+              <div>
+                <h3 style={styles.panelTitle}>Low Stock Alerts</h3>
+                <div style={styles.panelHint}>Threshold checks Remaining (with Transfers).</div>
+              </div>
+              <div style={styles.badge(lowStockProducts.length ? "#ffe0e3" : "#dcfce7", lowStockProducts.length ? "#7f1d1d" : "#14532d")}>
+                Alerts: {lowStockProducts.length}
+              </div>
+            </div>
+            <div style={styles.panelBody}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 160px", gap: 10 }}>
+                <input
+                  style={styles.input}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={lowStockThreshold}
+                  onChange={(e) => setLowStockThreshold(Number(e.target.value) || 0)}
+                  placeholder="Threshold"
+                />
+                <button
+                  style={styles.btnPrimary}
+                  onClick={() =>
+                    Swal.fire({
+                      icon: lowStockProducts.length ? "warning" : "success",
+                      title: "Low Stock Alerts",
+                      html:
+                        lowStockProducts.length === 0
+                          ? "No products under threshold."
+                          : `<div style="text-align:left; font-weight:800;">
+                              ${lowStockProducts
+                                .slice(0, 12)
+                                .map((x) => `<div>• <b>${escapeHtml(x.product)}</b> — Remaining: ${x.remaining}</div>`)
+                                .join("")}
+                             </div>`,
+                    })
+                  }
+                >
+                  View Alerts
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Summary Cards */}
+        {/* KPI Panel */}
         {summary && (
-          <div style={styles.cardsRow}>
-            <div style={styles.card}>
-              <div style={styles.cardAccent} />
-              <div style={styles.cardLabel}>BOOKED</div>
-              <div style={styles.cardValue}>{Number(summary.bookedQty || 0).toLocaleString()}</div>
-              <div style={styles.cardSubValue}>₨ {Number(summary.bookedValue || 0).toLocaleString()}</div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={styles.cardAccent} />
-              <div style={styles.cardLabel}>ON WAY</div>
-              <div style={styles.cardValue}>{Number(summary.onWayQty || 0).toLocaleString()}</div>
-              <div style={styles.cardSubValue}>₨ {Number(summary.onWayValue || 0).toLocaleString()}</div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={styles.cardAccent} />
-              <div style={styles.cardLabel}>UNLOADED</div>
-              <div style={styles.cardValue}>{Number(summary.unloadedQty || 0).toLocaleString()}</div>
-              <div style={styles.cardSubValue}>₨ {Number(summary.unloadedValue || 0).toLocaleString()}</div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={styles.cardAccent} />
-              <div style={styles.cardLabel}>AVAILABLE</div>
-              <div style={{ ...styles.cardValue, color: "#0f5132" }}>
-                {Number(availableQtyOverall || 0).toLocaleString()}
-              </div>
-              <div style={styles.cardSubValue}>
-                ₨ {Number(availableValueOverall || 0).toLocaleString()}
-                <div style={{ fontSize: "9px", marginTop: "2px", color: "#6b7a94" }}>
-                  (Total Purchased - Total Sold) • charges included
+          <div style={styles.panel}>
+            <div style={styles.panelHead}>
+              <div>
+                <h3 style={styles.panelTitle}>Executive Summary</h3>
+                <div style={styles.panelHint}>
+                  Overall Available = Total Purchased − Total Sold (Transfers do NOT change overall, only type-wise remaining)
                 </div>
               </div>
             </div>
+            <div style={styles.panelBody}>
+              <div style={styles.kpis}>
+                <div style={styles.kpi}>
+                  <div style={styles.kpiBar} />
+                  <div style={styles.kpiLabel}>BOOKED</div>
+                  <div style={styles.kpiValue}>{Number(summary.bookedQty || 0).toLocaleString()}</div>
+                  <div style={styles.kpiSub}>₨ {Number(summary.bookedValue || 0).toLocaleString()}</div>
+                </div>
 
-            <div style={styles.card}>
-              <div style={styles.cardAccent} />
-              <div style={styles.cardLabel}>TOTAL SOLD QTY</div>
-              <div style={{ ...styles.cardValue, color: "#842029" }}>
-                {Number(totalSoldQtyOverall || 0).toLocaleString()}
+                <div style={styles.kpi}>
+                  <div style={styles.kpiBar} />
+                  <div style={styles.kpiLabel}>ON WAY</div>
+                  <div style={styles.kpiValue}>{Number(summary.onWayQty || 0).toLocaleString()}</div>
+                  <div style={styles.kpiSub}>₨ {Number(summary.onWayValue || 0).toLocaleString()}</div>
+                </div>
+
+                <div style={styles.kpi}>
+                  <div style={styles.kpiBar} />
+                  <div style={styles.kpiLabel}>UNLOADED</div>
+                  <div style={styles.kpiValue}>{Number(summary.unloadedQty || 0).toLocaleString()}</div>
+                  <div style={styles.kpiSub}>₨ {Number(summary.unloadedValue || 0).toLocaleString()}</div>
+                </div>
+
+                <div style={styles.kpi}>
+                  <div style={styles.kpiBar} />
+                  <div style={styles.kpiLabel}>AVAILABLE QTY (OVERALL)</div>
+                  <div style={{ ...styles.kpiValue, color: ui.ok }}>
+                    {Number(availableQtyOverall || 0).toLocaleString()}
+                  </div>
+                  <div style={styles.kpiSub}>₨ {Number(availableValueOverall || 0).toLocaleString()}</div>
+                </div>
+
+                <div style={styles.kpi}>
+                  <div style={styles.kpiBar} />
+                  <div style={styles.kpiLabel}>TOTAL SOLD QTY</div>
+                  <div style={{ ...styles.kpiValue, color: ui.danger }}>
+                    {Number(totalSoldQtyOverall || 0).toLocaleString()}
+                  </div>
+                  <div style={styles.kpiSub}>Preferred: Ledger SALES quantity</div>
+                </div>
+
+                <div style={styles.kpi}>
+                  <div style={styles.kpiBar} />
+                  <div style={styles.kpiLabel}>TOTAL PURCHASED</div>
+                  <div style={styles.kpiValue}>{Number(totalPurchasedOverall || 0).toLocaleString()}</div>
+                  <div style={styles.kpiSub}>₨ {Number(totalPurchasedValueOverall || 0).toLocaleString()}</div>
+                </div>
               </div>
-              <div style={styles.cardSubValue}>Preferred: ledger SALES qty</div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={styles.cardAccent} />
-              <div style={styles.cardLabel}>TOTAL STOCK (PURCHASED)</div>
-              <div style={styles.cardValue}>{Number(totalPurchasedOverall || 0).toLocaleString()}</div>
-              <div style={styles.cardSubValue}>₨ {Number(totalPurchasedValueOverall || 0).toLocaleString()}</div>
             </div>
           </div>
         )}
 
-        {/* Stock by Product */}
-        {localByProduct && Object.keys(localByProduct).length > 0 && (
-          <div style={styles.section}>
-            <div style={styles.sectionHeader}>
-              <h3 style={styles.sectionTitle}>Stock by Product</h3>
-              <div style={styles.sectionHint}>Accurate: charges included + safe sold logic</div>
+        {/* Main Grid */}
+        <div style={styles.grid2}>
+          <div style={styles.panel}>
+            <div style={styles.panelHead}>
+              <div>
+                <h3 style={styles.panelTitle}>Stock by Product</h3>
+                <div style={styles.panelHint}>Remaining includes Transfers (In/Out). Purchased stays original.</div>
+              </div>
+            </div>
+            <div style={styles.panelBody}>
+              <div style={styles.tableWrap}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.th}>Product</th>
+                      <th style={styles.th}>Purchased</th>
+                      <th style={styles.th}>Remaining (Now)</th>
+                      <th style={styles.th}>Sold</th>
+                      <th style={styles.th}>Purchase Value</th>
+                      <th style={styles.th}>Remaining Value</th>
+                      <th style={styles.th}>Transfer Out</th>
+                      <th style={styles.th}>Transfer In</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.keys(localByProduct || {}).length === 0 && (
+                      <tr>
+                        <td style={styles.td} colSpan={8}>
+                          No product summary yet.
+                        </td>
+                      </tr>
+                    )}
+
+                    {Object.entries(localByProduct || {}).map(([product, data], idx) => {
+                      const warn = Number(data.remaining || 0) > 0 && Number(data.remaining || 0) <= lowStockThreshold;
+                      return (
+                        <tr key={product} style={idx % 2 ? styles.rowAlt : null}>
+                          <td style={styles.td}><b>{product}</b></td>
+                          <td style={styles.td}>{Number(data.totalPurchased || 0).toLocaleString()}</td>
+                          <td style={styles.td}>
+                            <span style={styles.badge(warn ? "#ffe0e3" : "#dcfce7", warn ? "#7f1d1d" : "#14532d")}>
+                              {Number(data.remaining || 0).toLocaleString()}
+                            </span>
+                          </td>
+                          <td style={styles.td}>{Number(data.sold || 0).toLocaleString()}</td>
+                          <td style={styles.td}>₨ {Number(data.purchaseValue || 0).toLocaleString()}</td>
+                          <td style={styles.td}>₨ {Number(data.remainingValue || 0).toLocaleString()}</td>
+                          <td style={styles.td}>{Number(data.transferOut || 0).toLocaleString()}</td>
+                          <td style={styles.td}>{Number(data.transferIn || 0).toLocaleString()}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{ marginTop: 10, fontSize: 11, color: ui.sub, fontWeight: 800 }}>
+                Tip: Use <b>Transfer Qty</b> to move remaining stock from one type to another (entry stays same, only remaining changes).
+              </div>
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div style={styles.panel}>
+            <div style={styles.panelHead}>
+              <div>
+                <h3 style={styles.panelTitle}>Filters</h3>
+                <div style={styles.panelHint}>Use filters + search for fastest results</div>
+              </div>
+              <button style={styles.btn} onClick={clearFilters}>♻️ Clear</button>
             </div>
 
+            <div style={styles.panelBody}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10 }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 1000, color: ui.sub, marginBottom: 6 }}>Status</div>
+                  <select
+                    name="status"
+                    value={filters.status}
+                    onChange={handleFilterChange}
+                    style={styles.select}
+                  >
+                    <option value="">All Status</option>
+                    <option value="BOOKED">Booked</option>
+                    <option value="ON_WAY">On Way</option>
+                    <option value="UNLOADED">Unloaded</option>
+                    <option value="AVAILABLE">Available</option>
+                    <option value="SOLD">Sold</option>
+                  </select>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 1000, color: ui.sub, marginBottom: 6 }}>Product</div>
+                  <select
+                    name="productType"
+                    value={filters.productType}
+                    onChange={handleFilterChange}
+                    style={styles.select}
+                  >
+                    <option value="">All Products</option>
+                    {uniqueProducts.map((p) => (
+                      <option key={p} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 1000, color: ui.sub, marginBottom: 6 }}>Supplier</div>
+                  <select
+                    name="supplierName"
+                    value={filters.supplierName}
+                    onChange={handleFilterChange}
+                    style={styles.select}
+                  >
+                    <option value="">All Suppliers</option>
+                    {uniqueSuppliers.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  style={styles.btn}
+                  onClick={() => openTransferWizard()}
+                >
+                  🔁 Transfer Qty
+                </button>
+
+                <button
+                  style={styles.btnPrimary}
+                  onClick={() => openStockWizard({ mode: "create" })}
+                >
+                  ➕ Add Stock Entry (Wizard)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ✅ Transfer History Panel */}
+        <div style={styles.panel}>
+          <div style={styles.panelHead}>
+            <div>
+              <h3 style={styles.panelTitle}>Transfer History</h3>
+              <div style={styles.panelHint}>
+                Local-only records • Undo any transfer to restore qty
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button style={styles.btn} onClick={exportTransfersCSV}>📤 Export Transfers CSV</button>
+              <button
+                style={styles.btnDanger}
+                onClick={async () => {
+                  if (!transfers?.length) return;
+                  const res = await Swal.fire({
+                    title: "Clear all transfers?",
+                    text: "This removes all transfer records and restores type totals.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, clear",
+                    cancelButtonText: "Cancel",
+                  });
+                  if (!res.isConfirmed) return;
+                  setTransfers([]);
+                  setTransfersLS([]);
+                  Swal.fire({ icon: "success", title: "Cleared", timer: 900, showConfirmButton: false });
+                }}
+              >
+                🧹 Clear Transfers
+              </button>
+            </div>
+          </div>
+
+          <div style={styles.panelBody}>
             <div style={styles.tableWrap}>
               <table style={styles.table}>
                 <thead>
                   <tr>
-                    <th style={styles.th}>Product</th>
-                    <th style={styles.th}>Total Purchased</th>
-                    <th style={styles.th}>Remaining</th>
-                    <th style={styles.th}>Sold</th>
-                    <th style={styles.th}>Purchase Value</th>
-                    <th style={styles.th}>Remaining Value</th>
+                    <th style={styles.th}>Date</th>
+                    <th style={styles.th}>From (Entry)</th>
+                    <th style={styles.th}>From Type</th>
+                    <th style={styles.th}>To Type</th>
+                    <th style={styles.th}>Qty</th>
+                    <th style={styles.th}>Unit Cost</th>
+                    <th style={styles.th}>Note</th>
+                    <th style={styles.th}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(localByProduct).map(([product, data], idx) => (
-                    <tr key={product} style={idx % 2 ? styles.rowAlt : null}>
-                      <td style={styles.td}>
-                        <strong>{product}</strong>
+                  {(transfers || []).length === 0 && (
+                    <tr>
+                      <td style={styles.td} colSpan={8}>
+                        No transfers yet. Use <b>Transfer Qty</b> to move remaining qty between types.
                       </td>
-                      <td style={styles.td}>{Number(data.totalPurchased || 0).toLocaleString()}</td>
-                      <td style={styles.td}>
-                        <strong style={{ color: Number(data.remaining || 0) <= lowStockThreshold ? "#b02a37" : "#0f5132" }}>
-                          {Number(data.remaining || 0).toLocaleString()}
-                        </strong>
-                      </td>
-                      <td style={styles.td}>{Number(data.sold || 0).toLocaleString()}</td>
-                      <td style={styles.td}>₨ {Number(data.purchaseValue || 0).toLocaleString()}</td>
-                      <td style={styles.td}>₨ {Number(data.remainingValue || 0).toLocaleString()}</td>
                     </tr>
-                  ))}
+                  )}
+
+                  {(transfers || []).slice(0, 50).map((t, idx) => {
+                    const fromLabel = `${t.fromPurchaseDate || "-"} • ${t.fromEntryId || "-"}`;
+                    return (
+                      <tr key={t.id || idx} style={idx % 2 ? styles.rowAlt : null}>
+                        <td style={styles.td}>{t.transferDate || formatDate(t.createdAt) || "-"}</td>
+                        <td style={styles.td}><b>{fromLabel}</b></td>
+                        <td style={styles.td}>{t.fromProductType || "-"}</td>
+                        <td style={styles.td}><b>{t.toProductType || "-"}</b></td>
+                        <td style={styles.td}>{Number(t.qty || 0).toLocaleString()}</td>
+                        <td style={styles.td}>₨ {Number(t.unitCost || 0).toFixed(4)}</td>
+                        <td style={styles.td}>{t.note || "-"}</td>
+                        <td style={styles.td}>
+                          <button style={styles.actionDanger} onClick={() => removeTransfer(t.id)}>
+                            Undo
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
 
-        {/* Add New Stock Entry */}
-        <div style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h3 style={styles.sectionTitle}>Add New Stock Entry</h3>
-            <div style={styles.sectionHint}>Charges will be included in total + effective unit cost</div>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            <div style={styles.formGrid}>
-              <div>
-                <label style={styles.label}>Product Type *</label>
-                <input
-                  name="productType"
-                  list="product-types"
-                  value={form.productType}
-                  onChange={handleChange}
-                  style={styles.input}
-                  required
-                />
-                <datalist id="product-types">
-                  {uniqueProducts.map((p) => (
-                    <option key={p} value={p} />
-                  ))}
-                </datalist>
+            {(transfers || []).length > 50 && (
+              <div style={{ marginTop: 10, fontSize: 11, color: ui.sub, fontWeight: 800 }}>
+                Showing latest 50 transfers. Export CSV for full list.
               </div>
-
-              <div>
-                <label style={styles.label}>Status</label>
-                <select name="status" value={form.status} onChange={handleChange} style={styles.select}>
-                  <option value="BOOKED">Booked</option>
-                  <option value="ON_WAY">On Way</option>
-                  <option value="UNLOADED">Unloaded</option>
-                  <option value="AVAILABLE">Available</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={styles.label}>Purchase Date *</label>
-                <input
-                  type="date"
-                  name="purchaseDate"
-                  value={form.purchaseDate}
-                  onChange={handleChange}
-                  style={styles.input}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={styles.label}>Quantity *</label>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={form.quantity}
-                  onChange={handleChange}
-                  style={styles.input}
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={styles.label}>Purchase Rate (per unit) *</label>
-                <input
-                  type="number"
-                  name="purchaseRate"
-                  value={form.purchaseRate}
-                  onChange={handleChange}
-                  style={styles.input}
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={styles.label}>Supplier Name</label>
-                <input
-                  name="supplierName"
-                  list="supplier-names"
-                  value={form.supplierName}
-                  onChange={handleChange}
-                  style={styles.input}
-                />
-                <datalist id="supplier-names">
-                  {uniqueSuppliers.map((s) => (
-                    <option key={s} value={s} />
-                  ))}
-                </datalist>
-              </div>
-
-              <div>
-                <label style={styles.label}>Invoice No</label>
-                <input name="supplierInvoiceNo" value={form.supplierInvoiceNo} onChange={handleChange} style={styles.input} />
-              </div>
-
-              <div>
-                <label style={styles.label}>Transport Company</label>
-                <input name="transportCompany" value={form.transportCompany} onChange={handleChange} style={styles.input} />
-              </div>
-
-              <div>
-                <label style={styles.label}>Vehicle Number</label>
-                <input name="vehicleNumber" value={form.vehicleNumber} onChange={handleChange} style={styles.input} />
-              </div>
-
-              <div>
-                <label style={styles.label}>Warehouse Location</label>
-                <input name="warehouseLocation" value={form.warehouseLocation} onChange={handleChange} style={styles.input} />
-              </div>
-
-              <div>
-                <label style={styles.label}>Loading Charges</label>
-                <input type="number" name="loadingCharges" value={form.loadingCharges} onChange={handleChange} style={styles.input} min="0" step="0.01" />
-              </div>
-
-              <div>
-                <label style={styles.label}>Unloading Charges</label>
-                <input type="number" name="unloadingCharges" value={form.unloadingCharges} onChange={handleChange} style={styles.input} min="0" step="0.01" />
-              </div>
-
-              <div>
-                <label style={styles.label}>Transport Charges</label>
-                <input type="number" name="transportCharges" value={form.transportCharges} onChange={handleChange} style={styles.input} min="0" step="0.01" />
-              </div>
-
-              <div>
-                <label style={styles.label}>Other Charges</label>
-                <input type="number" name="otherCharges" value={form.otherCharges} onChange={handleChange} style={styles.input} min="0" step="0.01" />
-              </div>
-
-              <div style={{ gridColumn: "1 / -1" }}>
-                <label style={styles.label}>Other Charges Description</label>
-                <input name="otherChargesDescription" value={form.otherChargesDescription} onChange={handleChange} style={styles.input} />
-              </div>
-
-              <div>
-                <label style={styles.label}>Expected Arrival Date</label>
-                <input type="date" name="expectedArrivalDate" value={form.expectedArrivalDate} onChange={handleChange} style={styles.input} />
-              </div>
-
-              <div style={{ gridColumn: "1 / -1" }}>
-                <label style={styles.label}>Notes</label>
-                <textarea name="notes" value={form.notes} onChange={handleChange} style={styles.textarea} />
-              </div>
-            </div>
-
-            {/* Cost Box */}
-            <div style={styles.costBox}>
-              <div style={styles.costGrid}>
-                <div style={styles.costItem}>
-                  <div style={styles.sectionHint}>Base Value</div>
-                  <div style={{ fontWeight: 900, fontSize: "14px" }}>₨ {Number(costDetails.baseValue || 0).toLocaleString()}</div>
-                </div>
-                <div style={styles.costItem}>
-                  <div style={styles.sectionHint}>Total Charges</div>
-                  <div style={{ fontWeight: 900, fontSize: "14px" }}>₨ {Number(costDetails.totalCharges || 0).toLocaleString()}</div>
-                </div>
-                <div style={styles.costItem}>
-                  <div style={styles.sectionHint}>Total Cost</div>
-                  <div style={{ fontWeight: 900, fontSize: "14px", color: "#1f3b7a" }}>
-                    ₨ {Number(costDetails.totalCost || 0).toLocaleString()}
-                  </div>
-                </div>
-                <div style={styles.costItem}>
-                  <div style={styles.sectionHint}>Effective Rate/Unit (includes charges)</div>
-                  <div style={{ fontWeight: 900, fontSize: "14px" }}>₨ {Number(costDetails.effectiveRate || 0).toFixed(4)}</div>
-                </div>
-              </div>
-            </div>
-
-            <button style={{ ...styles.btn, marginTop: "14px" }} type="submit" disabled={saving}>
-              {saving ? "Saving..." : "➕ Add Stock Entry"}
-            </button>
-          </form>
-        </div>
-
-        {/* Filters */}
-        <div style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h3 style={styles.sectionTitle}>Filters</h3>
-            <div style={styles.sectionHint}>Use these + search for fastest results</div>
-          </div>
-
-          <div style={styles.formGrid}>
-            <div>
-              <label style={styles.label}>Status</label>
-              <select name="status" value={filters.status} onChange={handleFilterChange} style={styles.select}>
-                <option value="">All Status</option>
-                <option value="BOOKED">Booked</option>
-                <option value="ON_WAY">On Way</option>
-                <option value="UNLOADED">Unloaded</option>
-                <option value="AVAILABLE">Available</option>
-                <option value="SOLD">Sold</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={styles.label}>Product Type</label>
-              <select name="productType" value={filters.productType} onChange={handleFilterChange} style={styles.select}>
-                <option value="">All Products</option>
-                {uniqueProducts.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={styles.label}>Supplier</label>
-              <select name="supplierName" value={filters.supplierName} onChange={handleFilterChange} style={styles.select}>
-                <option value="">All Suppliers</option>
-                {uniqueSuppliers.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
-              <button type="button" onClick={clearFilters} style={{ ...styles.btnGhost, width: "100%" }}>
-                Clear
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Bulk Actions */}
-        <div style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h3 style={styles.sectionTitle}>Bulk Actions</h3>
-            <div style={styles.sectionHint}>
-              Selected: <b>{selectedIds.size}</b>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button style={styles.btnGhost} onClick={() => bulkUpdateStatus("BOOKED")}>Mark BOOKED</button>
-            <button style={styles.btnGhost} onClick={() => bulkUpdateStatus("ON_WAY")}>Mark ON WAY</button>
-            <button style={styles.btnGhost} onClick={() => bulkUpdateStatus("UNLOADED")}>Mark UNLOADED</button>
-            <button style={styles.btn} onClick={() => bulkUpdateStatus("AVAILABLE")}>Mark AVAILABLE</button>
-            <button style={styles.btnDanger} onClick={bulkDelete}>🗑️ Delete Selected</button>
+            )}
           </div>
         </div>
 
         {/* Entries Table */}
-        <div style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h3 style={styles.sectionTitle}>
-              Stock Entries <span style={styles.sectionHint}>({filteredEntries.length})</span>
-            </h3>
-            <div style={styles.sectionHint}>Includes Effective Rate + charges</div>
+        <div style={styles.panel}>
+          <div style={styles.panelHead}>
+            <div>
+              <h3 style={styles.panelTitle}>
+                Stock Entries <span style={styles.panelHint}>({filteredEntries.length})</span>
+              </h3>
+              <div style={styles.panelHint}>
+                Remaining (Now) = Remaining (sales-based) − Transfer Out • Purchased qty stays same
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button style={styles.btn} onClick={() => bulkUpdateStatus("AVAILABLE")}>✅ Bulk Available</button>
+              <button style={styles.btnDanger} onClick={bulkDelete}>🗑️ Bulk Delete</button>
+            </div>
           </div>
 
-          <div style={styles.tableWrap}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>
-                    <input
-                      type="checkbox"
-                      onChange={selectAllVisible}
-                      checked={
-                        filteredEntries.length > 0 &&
-                        filteredEntries.every((e) => selectedIds.has(String(e._id)))
-                      }
-                    />
-                  </th>
-                  <th style={{ ...styles.th, cursor: "pointer" }} onClick={() => toggleSort("purchaseDate")}>
-                    Date
-                  </th>
-                  <th style={{ ...styles.th, cursor: "pointer" }} onClick={() => toggleSort("productType")}>
-                    Product
-                  </th>
-                  <th style={styles.th}>Supplier</th>
-                  <th style={styles.th}>Status</th>
-                  <th style={{ ...styles.th, cursor: "pointer" }} onClick={() => toggleSort("qty")}>
-                    Qty
-                  </th>
-                  <th style={{ ...styles.th, cursor: "pointer" }} onClick={() => toggleSort("remaining")}>
-                    Remaining
-                  </th>
-                  <th style={styles.th}>Rate</th>
-                  <th style={styles.th}>Charges</th>
-                  <th style={{ ...styles.th, cursor: "pointer" }} onClick={() => toggleSort("totalCost")}>
-                    Total Cost
-                  </th>
-                  <th style={styles.th}>Effective / Unit</th>
-                  <th style={styles.th}>Actions</th>
-                </tr>
-              </thead>
+          <div style={styles.panelBody}>
+            <div style={styles.tableWrap}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>
+                      <input
+                        type="checkbox"
+                        onChange={selectAllVisible}
+                        checked={
+                          filteredEntries.length > 0 &&
+                          filteredEntries.every((e) => selectedIds.has(String(e._id)))
+                        }
+                      />
+                    </th>
+                    <th style={{ ...styles.th, cursor: "pointer" }} onClick={() => toggleSort("purchaseDate")}>Date</th>
+                    <th style={{ ...styles.th, cursor: "pointer" }} onClick={() => toggleSort("productType")}>Product</th>
+                    <th style={styles.th}>Supplier</th>
+                    <th style={styles.th}>Status</th>
+                    <th style={{ ...styles.th, cursor: "pointer" }} onClick={() => toggleSort("qty")}>Qty (Purchased)</th>
+                    <th style={{ ...styles.th, cursor: "pointer" }} onClick={() => toggleSort("remaining")}>Remaining (Now)</th>
+                    <th style={styles.th}>Transferred Out</th>
+                    <th style={styles.th}>Rate</th>
+                    <th style={styles.th}>Charges</th>
+                    <th style={{ ...styles.th, cursor: "pointer" }} onClick={() => toggleSort("totalCost")}>Total Cost</th>
+                    <th style={styles.th}>Eff/Unit</th>
+                    <th style={styles.th}>Actions</th>
+                  </tr>
+                </thead>
 
-              <tbody>
-                {filteredEntries.map((entry, idx) => {
-                  const isEditing = editingId === entry._id;
+                <tbody>
+                  {filteredEntries.map((entry, idx) => {
+                    const qty = getEntryQty(entry);
+                    const effectiveStatus = getEffectiveStatus(entry);
+                    const statusStyle = statusColors[effectiveStatus] || { bg: "#eef2ff", color: "#0b1220" };
+                    const costs = calcEntryCosts(entry);
 
-                  const qty = getEntryQty(entry);
-                  const remaining = getEntryRemaining(entry);
-                  const effectiveStatus = getEffectiveStatus(entry);
-                  const statusStyle = statusColors[effectiveStatus] || { bg: "#e9ecef", color: "#495057" };
+                    const tOut = getTransferredOutForEntry(entry._id);
+                    const remNow = getEntryRemainingNow(entry);
 
-                  if (isEditing) {
                     return (
-                      <tr key={entry._id}>
-                        <td style={styles.td} colSpan="12">
-                          <div style={{ fontSize: "12px" }}>
-                            <strong>Editing Entry</strong>
+                      <tr key={entry._id} style={idx % 2 ? styles.rowAlt : null}>
+                        <td style={styles.td}>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(String(entry._id))}
+                            onChange={() => toggleSelect(entry._id)}
+                          />
+                        </td>
 
-                            <div style={{ ...styles.formGrid, marginTop: "10px" }}>
-                              <input type="date" name="purchaseDate" value={editForm.purchaseDate} onChange={handleEditChange} style={styles.input} />
-                              <input name="productType" value={editForm.productType} onChange={handleEditChange} style={styles.input} />
-                              <input name="supplierName" value={editForm.supplierName} onChange={handleEditChange} style={styles.input} placeholder="Supplier" />
-                              <select name="status" value={editForm.status} onChange={handleEditChange} style={styles.select}>
-                                <option value="BOOKED">Booked</option>
-                                <option value="ON_WAY">On Way</option>
-                                <option value="UNLOADED">Unloaded</option>
-                                <option value="AVAILABLE">Available</option>
-                                <option value="SOLD">Sold</option>
-                              </select>
+                        <td style={styles.td}>{formatDate(entry.purchaseDate)}</td>
+                        <td style={styles.td}><b>{entry.productType || "-"}</b></td>
+                        <td style={styles.td}>{entry.supplierName || "-"}</td>
 
-                              <input type="number" name="quantity" value={editForm.quantity} onChange={handleEditChange} style={styles.input} placeholder="Quantity" />
-                              <input type="number" name="purchaseRate" value={editForm.purchaseRate} onChange={handleEditChange} style={styles.input} placeholder="Rate" />
-                              <input type="number" name="loadingCharges" value={editForm.loadingCharges} onChange={handleEditChange} style={styles.input} placeholder="Loading" />
-                              <input type="number" name="unloadingCharges" value={editForm.unloadingCharges} onChange={handleEditChange} style={styles.input} placeholder="Unloading" />
-                              <input type="number" name="transportCharges" value={editForm.transportCharges} onChange={handleEditChange} style={styles.input} placeholder="Transport" />
-                              <input type="number" name="otherCharges" value={editForm.otherCharges} onChange={handleEditChange} style={styles.input} placeholder="Other" />
-                            </div>
+                        <td style={styles.td}>
+                          <span style={styles.badge(statusStyle.bg, statusStyle.color)}>
+                            {effectiveStatus}
+                          </span>
+                        </td>
 
-                            <div style={{ marginTop: "10px", display: "flex", gap: "8px" }}>
-                              <button style={styles.btn} onClick={() => saveEdit(entry._id)}>
-                                Save
-                              </button>
-                              <button style={styles.btnGhost} onClick={cancelEdit}>
-                                Cancel
-                              </button>
-                            </div>
+                        <td style={styles.td}>{Number(qty || 0).toLocaleString()}</td>
+
+                        <td style={styles.td}>
+                          <span
+                            style={styles.badge(
+                              remNow <= 0 ? "#ffe0e3" : "#dcfce7",
+                              remNow <= 0 ? "#7f1d1d" : "#14532d"
+                            )}
+                          >
+                            {Number(remNow || 0).toLocaleString()}
+                          </span>
+                        </td>
+
+                        <td style={styles.td}>
+                          {tOut > 0 ? (
+                            <span style={styles.badge("#fff2cc", "#7a5b00")}>
+                              {Number(tOut).toLocaleString()}
+                            </span>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+
+                        <td style={styles.td}>₨ {Number(costs.rate || 0).toLocaleString()}</td>
+                        <td style={styles.td}>₨ {Number(costs.totalCharges || 0).toLocaleString()}</td>
+                        <td style={styles.td}><b>₨ {Number(costs.totalCost || 0).toLocaleString()}</b></td>
+                        <td style={styles.td}>₨ {Number(costs.effectiveRate || 0).toFixed(4)}</td>
+
+                        <td style={styles.td}>
+                          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                            <button style={styles.actionBtn} onClick={() => viewDetails(entry)}>View</button>
+                            <button style={styles.actionBtn} onClick={() => openStockWizard({ mode: "edit", entry })}>
+                              Edit
+                            </button>
+                            <button style={styles.actionBtn} onClick={() => cloneEntry(entry)}>Clone</button>
+
+                            {/* ✅ NEW: Transfer from this entry */}
+                            <button style={styles.actionBtn} onClick={() => openTransferWizard({ fromEntry: entry })}>
+                              Transfer
+                            </button>
+
+                            <button style={styles.actionDanger} onClick={() => deleteEntry(entry._id)}>Delete</button>
                           </div>
                         </td>
                       </tr>
                     );
-                  }
+                  })}
 
-                  const costs = calcEntryCosts(entry);
-                  const statusTextColor = effectiveStatus === "SOLD" ? "#842029" : "#0f5132";
-
-                  return (
-                    <tr key={entry._id} style={idx % 2 ? styles.rowAlt : null}>
-                      <td style={styles.td}>
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(String(entry._id))}
-                          onChange={() => toggleSelect(entry._id)}
-                        />
-                      </td>
-
-                      <td style={styles.td}>{formatDate(entry.purchaseDate)}</td>
-
-                      <td style={styles.td}>
-                        <strong>{entry.productType}</strong>
-                      </td>
-
-                      <td style={styles.td}>{entry.supplierName || "-"}</td>
-
-                      <td style={styles.td}>
-                        <span style={{ ...styles.badge, background: statusStyle.bg, color: statusStyle.color }}>
-                          {effectiveStatus}
-                        </span>
-                      </td>
-
-                      <td style={styles.td}>{Number(qty || 0).toLocaleString()}</td>
-
-                      <td style={styles.td}>
-                        <strong style={{ color: statusTextColor }}>{Number(remaining || 0).toLocaleString()}</strong>
-                      </td>
-
-                      <td style={styles.td}>₨ {Number(costs.rate || 0).toLocaleString()}</td>
-
-                      <td style={styles.td}>₨ {Number(costs.totalCharges || 0).toLocaleString()}</td>
-
-                      <td style={styles.td}>
-                        <strong>₨ {Number(costs.totalCost || 0).toLocaleString()}</strong>
-                      </td>
-
-                      <td style={styles.td}>₨ {Number(costs.effectiveRate || 0).toFixed(4)}</td>
-
-                      <td style={styles.td}>
-                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                          <button style={styles.btnMini} onClick={() => viewDetails(entry)}>
-                            View
-                          </button>
-                          <button style={styles.btnMini} onClick={() => startEdit(entry)}>
-                            Edit
-                          </button>
-                          <button style={styles.btnDangerMini} onClick={() => deleteEntry(entry._id)}>
-                            Delete
-                          </button>
-                        </div>
+                  {filteredEntries.length === 0 && !loading && (
+                    <tr>
+                      <td style={styles.td} colSpan={13}>
+                        No entries found. Try clearing filters or search.
                       </td>
                     </tr>
-                  );
-                })}
-
-                {filteredEntries.length === 0 && !loading && (
-                  <tr>
-                    <td style={styles.td} colSpan="12">
-                      No stock entries found. Try clearing filters or search.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+
+        {/* Bulk floating bar */}
+        {selectedIds.size > 0 && (
+          <div style={styles.footerBar}>
+            <div style={styles.bulkBar}>
+              <div style={{ fontWeight: 1000 }}>
+                Selected: <span style={{ color: ui.accent }}>{selectedIds.size}</span>
+              </div>
+
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button style={styles.btn} onClick={() => bulkUpdateStatus("BOOKED")}>Mark BOOKED</button>
+                <button style={styles.btn} onClick={() => bulkUpdateStatus("ON_WAY")}>Mark ON WAY</button>
+                <button style={styles.btn} onClick={() => bulkUpdateStatus("UNLOADED")}>Mark UNLOADED</button>
+                <button style={styles.btnPrimary} onClick={() => bulkUpdateStatus("AVAILABLE")}>Mark AVAILABLE</button>
+                <button style={styles.btnDanger} onClick={bulkDelete}>🗑️ Delete Selected</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Details Modal */}
         {viewingEntry && (() => {
           const qty = getEntryQty(viewingEntry);
-          const remaining = getEntryRemaining(viewingEntry);
+
+          const remainingBase = getEntryRemaining(viewingEntry); // sales-based remaining
+          const transferredOut = getTransferredOutForEntry(viewingEntry._id);
+          const remainingNow = getEntryRemainingNow(viewingEntry);
+
           const effectiveStatus = getEffectiveStatus(viewingEntry);
-          const statusStyle = statusColors[effectiveStatus] || { bg: "#e9ecef", color: "#495057" };
+          const statusStyle = statusColors[effectiveStatus] || { bg: "#eef2ff", color: "#0b1220" };
           const costs = calcEntryCosts(viewingEntry);
 
           return (
-            <div style={styles.modalBackdrop} onClick={closeDetails}>
-              <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-                <div style={styles.modalHeader}>
-                  <h2 style={styles.modalTitle}>Stock Entry Details</h2>
-                  <button style={styles.btnGhost} onClick={closeDetails}>
-                    Close
-                  </button>
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(8,12,20,.55)",
+                backdropFilter: "blur(6px)",
+                zIndex: 999,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 14,
+              }}
+              onClick={closeDetails}
+            >
+              <div
+                style={{
+                  width: "min(1150px, 100%)",
+                  maxHeight: "90vh",
+                  overflow: "auto",
+                  background: "#fff",
+                  borderRadius: 18,
+                  border: `1px solid ${ui.stroke}`,
+                  boxShadow: ui.shadow,
+                  padding: 16,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+                  <div>
+                    <div style={{ fontWeight: 1000, fontSize: 16 }}>{companyName} — Stock Entry Details</div>
+                    <div style={{ fontSize: 11, color: ui.sub, fontWeight: 800, marginTop: 3 }}>
+                      Purchased qty stays same • Remaining Now includes Transfer Out
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button style={styles.btn} onClick={() => openStockWizard({ mode: "edit", entry: viewingEntry })}>
+                      Edit
+                    </button>
+                    <button style={styles.btn} onClick={() => openTransferWizard({ fromEntry: viewingEntry })}>
+                      🔁 Transfer
+                    </button>
+                    <button style={styles.btn} onClick={closeDetails}>Close</button>
+                  </div>
                 </div>
 
-                <div style={styles.detailGrid}>
-                  <div>
-                    <div style={styles.detailLabel}>Product Type</div>
-                    <div style={styles.detailValue}>{viewingEntry.productType}</div>
+                <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 10 }}>
+                  <div style={styles.kpi}>
+                    <div style={styles.kpiBar} />
+                    <div style={styles.kpiLabel}>PRODUCT</div>
+                    <div style={{ ...styles.kpiValue, fontSize: 16 }}>{viewingEntry.productType || "-"}</div>
+                    <div style={styles.kpiSub}>Purchase Date: {formatDate(viewingEntry.purchaseDate)}</div>
                   </div>
 
-                  <div>
-                    <div style={styles.detailLabel}>Status</div>
-                    <span style={{ ...styles.badge, background: statusStyle.bg, color: statusStyle.color }}>
-                      {effectiveStatus}
-                    </span>
+                  <div style={styles.kpi}>
+                    <div style={styles.kpiBar} />
+                    <div style={styles.kpiLabel}>STATUS</div>
+                    <div style={{ marginTop: 8 }}>
+                      <span style={styles.badge(statusStyle.bg, statusStyle.color)}>{effectiveStatus}</span>
+                    </div>
+                    <div style={styles.kpiSub}>Supplier: {viewingEntry.supplierName || "-"}</div>
                   </div>
 
-                  <div>
-                    <div style={styles.detailLabel}>Purchase Date</div>
-                    <div style={styles.detailValue}>{formatDate(viewingEntry.purchaseDate)}</div>
-                  </div>
-
-                  <div>
-                    <div style={styles.detailLabel}>Supplier</div>
-                    <div style={styles.detailValue}>{viewingEntry.supplierName || "-"}</div>
-                  </div>
-
-                  <div>
-                    <div style={styles.detailLabel}>Quantity</div>
-                    <div style={styles.detailValue}>{Number(qty || 0).toLocaleString()}</div>
-                  </div>
-
-                  <div>
-                    <div style={styles.detailLabel}>Remaining Quantity</div>
-                    <div style={{ ...styles.detailValue, color: effectiveStatus === "SOLD" ? "#842029" : "#0f5132" }}>
-                      {Number(remaining || 0).toLocaleString()}
+                  <div style={styles.kpi}>
+                    <div style={styles.kpiBar} />
+                    <div style={styles.kpiLabel}>REMAINING NOW</div>
+                    <div style={{ ...styles.kpiValue, color: remainingNow <= 0 ? ui.danger : ui.ok }}>
+                      {Number(remainingNow || 0).toLocaleString()}
+                    </div>
+                    <div style={styles.kpiSub}>
+                      Purchased: {Number(qty || 0).toLocaleString()} • Transfer Out: {Number(transferredOut || 0).toLocaleString()}
                     </div>
                   </div>
 
-                  <div>
-                    <div style={styles.detailLabel}>Total Charges</div>
-                    <div style={styles.detailValue}>₨ {Number(costs.totalCharges || 0).toLocaleString()}</div>
-                  </div>
-
-                  <div>
-                    <div style={styles.detailLabel}>Effective Rate/Unit</div>
-                    <div style={styles.detailValue}>₨ {Number(costs.effectiveRate || 0).toFixed(4)}</div>
-                  </div>
-
-                  <div style={{ gridColumn: "1 / -1" }}>
-                    <div style={styles.divider} />
-                    <div style={styles.detailLabel}>Total Cost</div>
-                    <div style={{ fontSize: "22px", fontWeight: 900, color: "#1f3b7a" }}>
+                  <div style={styles.kpi}>
+                    <div style={styles.kpiBar} />
+                    <div style={styles.kpiLabel}>TOTAL COST</div>
+                    <div style={{ ...styles.kpiValue, color: ui.accent }}>
                       ₨ {Number(costs.totalCost || 0).toLocaleString()}
+                    </div>
+                    <div style={styles.kpiSub}>
+                      Eff/Unit: ₨ {Number(costs.effectiveRate || 0).toFixed(4)} • Remaining (sales-based): {Number(remainingBase || 0).toLocaleString()}
                     </div>
                   </div>
                 </div>
@@ -2342,50 +2924,48 @@ function StockDashboard() {
                 {viewingEntry.salesDetails &&
                   Array.isArray(viewingEntry.salesDetails) &&
                   viewingEntry.salesDetails.length > 0 && (
-                    <>
-                      <div style={styles.divider} />
-                      <div style={styles.sectionHeader}>
-                        <h3 style={{ ...styles.sectionTitle, color: "#1f3b7a" }}>Sold To (Client Ledger Details)</h3>
+                    <div style={{ marginTop: 14 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+                        <div>
+                          <div style={{ fontWeight: 1000, fontSize: 14, color: "#0c2c7a" }}>Sold To (Client Ledger Details)</div>
+                          <div style={{ fontSize: 11, color: ui.sub, fontWeight: 800, marginTop: 3 }}>
+                            Showing SALES entries for <b>{viewingEntry.productType}</b>
+                          </div>
+                        </div>
                         {!viewingEntry.salesLinked && (
-                          <span style={{ ...styles.badge, background: "#fff3cd", color: "#856404" }}>
-                            Filtered by product type
-                          </span>
+                          <span style={styles.badge("#fff2cc", "#7a5b00")}>Filtered by product type</span>
                         )}
-                      </div>
-
-                      <div style={styles.sectionHint}>
-                        Showing SALES entries for <strong>{viewingEntry.productType}</strong>.
                       </div>
 
                       {(() => {
                         const stats = getSalesStats(viewingEntry.salesDetails, viewingEntry.productType);
                         return (
-                          <div style={{ ...styles.cardsRow, marginTop: "10px" }}>
-                            <div style={styles.card}>
-                              <div style={styles.cardAccent} />
-                              <div style={styles.cardLabel}>TOTAL CLIENTS</div>
-                              <div style={styles.cardValue}>{stats.uniqueClients}</div>
+                          <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10 }}>
+                            <div style={styles.kpi}>
+                              <div style={styles.kpiBar} />
+                              <div style={styles.kpiLabel}>TOTAL CLIENTS</div>
+                              <div style={styles.kpiValue}>{stats.uniqueClients}</div>
                             </div>
-                            <div style={styles.card}>
-                              <div style={styles.cardAccent} />
-                              <div style={styles.cardLabel}>TOTAL SOLD QTY</div>
-                              <div style={styles.cardValue}>{stats.totalQty.toLocaleString()}</div>
+                            <div style={styles.kpi}>
+                              <div style={styles.kpiBar} />
+                              <div style={styles.kpiLabel}>TOTAL SOLD QTY</div>
+                              <div style={styles.kpiValue}>{stats.totalQty.toLocaleString()}</div>
                             </div>
-                            <div style={styles.card}>
-                              <div style={styles.cardAccent} />
-                              <div style={styles.cardLabel}>TOTAL SALES VALUE</div>
-                              <div style={{ ...styles.cardValue, color: "#0f5132" }}>₨ {stats.totalDebit.toLocaleString()}</div>
+                            <div style={styles.kpi}>
+                              <div style={styles.kpiBar} />
+                              <div style={styles.kpiLabel}>TOTAL SALES VALUE</div>
+                              <div style={{ ...styles.kpiValue, color: ui.ok }}>₨ {stats.totalDebit.toLocaleString()}</div>
                             </div>
-                            <div style={styles.card}>
-                              <div style={styles.cardAccent} />
-                              <div style={styles.cardLabel}>AVG SALE RATE</div>
-                              <div style={styles.cardValue}>₨ {Number(stats.avgRate || 0).toFixed(2)}</div>
+                            <div style={styles.kpi}>
+                              <div style={styles.kpiBar} />
+                              <div style={styles.kpiLabel}>AVG SALE RATE</div>
+                              <div style={styles.kpiValue}>₨ {Number(stats.avgRate || 0).toFixed(2)}</div>
                             </div>
                           </div>
                         );
                       })()}
 
-                      <div style={{ ...styles.tableWrap, marginTop: "10px" }}>
+                      <div style={{ marginTop: 10, ...styles.tableWrap }}>
                         <table style={styles.table}>
                           <thead>
                             <tr>
@@ -2407,24 +2987,30 @@ function StockDashboard() {
                               const s = normalizeSaleRow(sale, forcedQty, viewingEntry.productType);
 
                               const payBadgeBg =
-                                s.paymentType === "CASH" ? "#d1e7dd" : s.paymentType === "BANK" ? "#cfe2ff" : "#fff3cd";
+                                s.paymentType === "CASH"
+                                  ? "#dcfce7"
+                                  : s.paymentType === "BANK"
+                                  ? "#dbe7ff"
+                                  : "#fff2cc";
                               const payBadgeColor =
-                                s.paymentType === "CASH" ? "#0f5132" : s.paymentType === "BANK" ? "#084298" : "#856404";
+                                s.paymentType === "CASH"
+                                  ? "#14532d"
+                                  : s.paymentType === "BANK"
+                                  ? "#0c2c7a"
+                                  : "#7a5b00";
 
                               return (
                                 <tr key={idx} style={idx % 2 ? styles.rowAlt : null}>
                                   <td style={styles.td}>{formatDate(s.date)}</td>
-                                  <td style={styles.td}><strong>{s.accountName || "-"}</strong></td>
+                                  <td style={styles.td}><b>{s.accountName || "-"}</b></td>
                                   <td style={styles.td}>{s.description}</td>
                                   <td style={styles.td}>{s.type || viewingEntry.productType}</td>
                                   <td style={{ ...styles.td, textAlign: "right" }}>{(s.qty || 0).toLocaleString()}</td>
                                   <td style={{ ...styles.td, textAlign: "right" }}>₨ {(s.rate || 0).toLocaleString()}</td>
                                   <td style={{ ...styles.td, textAlign: "right" }}>₨ {(s.loading || 0).toLocaleString()}</td>
-                                  <td style={{ ...styles.td, textAlign: "right" }}><strong>₨ {(s.debit || 0).toLocaleString()}</strong></td>
+                                  <td style={{ ...styles.td, textAlign: "right" }}><b>₨ {(s.debit || 0).toLocaleString()}</b></td>
                                   <td style={styles.td}>
-                                    <span style={{ ...styles.badge, background: payBadgeBg, color: payBadgeColor }}>
-                                      {s.paymentType}
-                                    </span>
+                                    <span style={styles.badge(payBadgeBg, payBadgeColor)}>{s.paymentType}</span>
                                   </td>
                                   <td style={{ ...styles.td, textAlign: "right" }}>
                                     {s.closingBalance != null ? Number(s.closingBalance).toLocaleString() : "-"}
@@ -2435,45 +3021,18 @@ function StockDashboard() {
                           </tbody>
                         </table>
                       </div>
-                    </>
+                    </div>
                   )}
 
-                {/* Status quick actions */}
-                {effectiveStatus !== "AVAILABLE" && effectiveStatus !== "SOLD" && (
-                  <div style={{ marginTop: "14px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                    {effectiveStatus === "BOOKED" && (
-                      <button
-                        style={styles.btn}
-                        onClick={() => {
-                          updateStatus(viewingEntry._id, "ON_WAY");
-                          closeDetails();
-                        }}
-                      >
-                        Mark as On Way
-                      </button>
-                    )}
-                    {effectiveStatus === "ON_WAY" && (
-                      <button
-                        style={styles.btn}
-                        onClick={() => {
-                          updateStatus(viewingEntry._id, "UNLOADED");
-                          closeDetails();
-                        }}
-                      >
-                        Mark as Unloaded
-                      </button>
-                    )}
-                    {effectiveStatus === "UNLOADED" && (
-                      <button
-                        style={styles.btn}
-                        onClick={() => {
-                          updateStatus(viewingEntry._id, "AVAILABLE");
-                          closeDetails();
-                        }}
-                      >
-                        Mark as Available
-                      </button>
-                    )}
+                {/* Quick Status Actions */}
+                {effectiveStatus !== "SOLD" && (
+                  <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button style={styles.btn} onClick={() => updateStatus(viewingEntry._id, "BOOKED")}>BOOKED</button>
+                    <button style={styles.btn} onClick={() => updateStatus(viewingEntry._id, "ON_WAY")}>ON WAY</button>
+                    <button style={styles.btn} onClick={() => updateStatus(viewingEntry._id, "UNLOADED")}>UNLOADED</button>
+                    <button style={styles.btnPrimary} onClick={() => updateStatus(viewingEntry._id, "AVAILABLE")}>
+                      AVAILABLE
+                    </button>
                   </div>
                 )}
               </div>
